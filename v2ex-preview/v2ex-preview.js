@@ -2,7 +2,7 @@
 // @name         v2ex-preview
 // @namespace    http://tampermonkey.net/
 // @version      0.1
-// @description  https://github.com/barrer/tampermonkey-script/v2ex-preview/
+// @description  https://github.com/barrer/tampermonkey-script/tree/master/v2ex-preview
 // @author       barrer
 // @match        https://www.v2ex.com/*
 // @grant        none
