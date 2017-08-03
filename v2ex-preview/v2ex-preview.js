@@ -45,6 +45,8 @@
         result = result.replace(/\n/g, '<br>');
         // 把正文插入标题后面
         var content = document.createElement('div');
+        content.style.fontSize = '13px';
+        content.style.marginTop = '1em';
         content.innerHTML = '<div>' + result + '</div>';
         element.parentElement.append(content);
     }
