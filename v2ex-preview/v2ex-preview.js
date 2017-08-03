@@ -48,11 +48,12 @@
         content.style.fontSize = '13px';
         content.style.marginTop = '1em';
         content.innerHTML = '<div>' + result + '</div>';
-        element.parentElement.append(content);
+        
+        $(element.parentElement).append($(content));
     }
 
-    var list = document.querySelectorAll('.item_title');
-    list.forEach(function(item, index) {
+    var $list = $('.item_title');
+    $list.each(function(index,item) {
         var a = item.querySelector('a');
         setTimeout(function() {
             gAjaxGet(a.getAttribute('href'), function(response, element) {
