@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：有道词典，金山词霸
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸”
 // @author       https://github.com/barrer
 // @match        http://*/*
