@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：有道词典，金山词霸
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.4
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -249,7 +249,8 @@
     function parseYoudao(rst) {
         try {
             var rstJson = JSON.parse(rst),
-                html = '';
+                html = '',
+                phoneStyle = 'color:#777!important;';
             if (rstJson.ec) {
                 var word = rstJson.ec.word[0],
                     tr = '';
@@ -257,7 +258,6 @@
                     ukphone = word.ukphone,
                     usphone = word.usphone,
                     phone = word.phone;
-                var phoneStyle = 'color:#777!important;';
                 if (ukphone && ukphone.length != 0) {
                     html += '<span style="' + phoneStyle + '">英[' + ukphone + '] </span>';
                 }
@@ -274,6 +274,14 @@
                 });
                 html += tr;
             }
+            // 中英翻译
+            if (rstJson.ce_new && rstJson.ce_new.word) {
+                rstJson.ce_new.word.forEach(function (w) {
+                    if (w.phone)
+                        html += '<span style="' + phoneStyle + '">[' + w.phone + '] </span><br>';
+                });
+            }
+            // 长句翻译
             if (rstJson.fanyi && rstJson.fanyi.tran) {
                 html += rstJson.fanyi.tran;
             }
@@ -285,13 +293,20 @@
     }
     /**金山词霸排版*/
     function parseIciba(rst) {
-        rst = rst.replace(/\\"/g, '"')
-            .replace(/<a.*?<\/a>/g, '')
+        rst = rst.replace(/class=\\"icIBahyI-prons\\"/g, '__mystyle__') // 音标
+            .replace(/\\"/g, '"') // 引号
+            // A标签
+            .replace(/<a([^>]*)?>详细释义<\/a([^>]*)?>/g, '')
+            .replace(/<a([^>]*)?>/g, '')
+            .replace(/<\/a([^>]*)?>/g, '')
+            // 清理属性、标签、多余空格
             .replace(/(?:class|id|style|xml:lang|lang)=\"([^"]*)\"/g, '')
             .replace(/(?:label>|strong>)/g, 'span>')
             .replace(/(?:<label|<strong)/g, '<span')
             .replace(/(?:p>)/g, 'div>')
-            .replace(/[ ]+/g, ' ');
+            .replace(/[ ]+/g, ' ')
+            // 音标
+            .replace(/__mystyle__/g, ' style="color:#777!important;"');
         var match = /dict.innerHTML='(.*)?';/g.exec(rst);
         return match[1];
     }
