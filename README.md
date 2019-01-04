@@ -11,7 +11,7 @@
 ![translate](translate/translate-dictionary.png)
 
 **脚本下载地址：**  
-[https://greasyfork.org/](https://greasyfork.org/)
+[https://greasyfork.org/zh-CN/users/158488-damijan](https://greasyfork.org/zh-CN/users/158488-damijan)
 
 **使用前：**  
 [https://tampermonkey.net/](https://tampermonkey.net/)  
