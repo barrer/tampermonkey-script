@@ -1,7 +1,14 @@
 ## Tampermonkey油猴子脚本
 
 **部分预览图：**
+
+### translate.js
+
 ![translate](translate/translate.png)
+
+### translate-dictionary.js
+
+![translate](translate/translate-dictionary.png)
 
 **脚本下载地址：**  
 [https://greasyfork.org/](https://greasyfork.org/)
