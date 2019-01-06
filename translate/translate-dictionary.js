@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：有道词典，金山词霸
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.6
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -67,9 +67,10 @@
             });
         }
     }];
-    // 翻译图标、内容面板
+    // 翻译图标、内容面板、当前选中
     var icon = document.createElement('div'),
-        content = document.createElement('div');
+        content = document.createElement('div'),
+        text;
     // 绑定图标拖动事件
     var iconDrag = new Drag(icon);
     iconArray.forEach(function (obj) {
@@ -79,8 +80,10 @@
         img.setAttribute('title', obj.name);
         img.addEventListener('mouseup', function () {
             if (iconDrag.elementOriginalLeft == parseInt(icon.style.left) &&
-                iconDrag.elementOriginalTop == parseInt(icon.style.top)) // 没有拖动鼠标抬起的时候触发点击事件
-                obj.trigger(window.getSelection().toString().trim()); // 启动翻译引擎
+                iconDrag.elementOriginalTop == parseInt(icon.style.top)) { // 没有拖动鼠标抬起的时候触发点击事件
+                text = window.getSelection().toString().trim();
+                obj.trigger(text); // 启动翻译引擎
+            }
         });
         img.setAttribute('style', '' +
             'cursor:pointer!important;' +
@@ -217,34 +220,88 @@
     }
 
     /**ajax 跨域访问公共方法*/
-    function ajax(url, success, error, element, method, data, headers) {
-        if (!!!method)
-            method = 'GET';
+    function ajax(url, success, error, obj) {
+        if (!!!obj)
+            obj = {};
+        if (!!!obj.method)
+            obj.method = 'GET';
         // >>>因为Tampermonkey跨域访问(a.com)时会自动携带对应域名(a.com)的对应cookie
         // 不会携带当前域名的cookie
         // 所以，GM_xmlhttpRequest【不存在】cookie跨域访问安全性问题
         // 以下设置默认headers不起作用<<<
-        if (!!!headers)
-            headers = {
+        if (!!!obj.headers)
+            obj.headers = {
                 'cookie': ''
             };
         GM_xmlhttpRequest({
-            method: method,
+            method: obj.method,
             url: url,
-            headers: headers,
-            data: data,
+            headers: obj.headers,
+            responseType: obj.responseType,
+            data: obj.data,
             onload: function (res) {
-                success(res.responseText, element);
+                success(res.responseText, res, obj);
             },
             onerror: function (res) {
-                error(res.responseText, element);
+                error(res.responseText, res, obj);
             }
         });
     }
     /**显示内容面板*/
     function showContent(html) {
+        // 发音
+        var audio = document.createElement('div'),
+            us = document.createElement('a'),
+            uk = document.createElement('a'),
+            space = document.createElement('span'),
+            style = '';
+        style += 'color:#36f!important;';
+        style += 'text-decoration:none!important;';
+        style += 'cursor:pointer!important;';
+        us.innerHTML = '♪US';
+        us.setAttribute('href', 'javascript:void(0)');
+        us.addEventListener('click', playUS);
+        // us.addEventListener('mouseover', playUS);
+        us.setAttribute('style', style);
+        uk.innerHTML = '♪UK';
+        uk.setAttribute('href', 'javascript:void(0)');
+        uk.addEventListener('click', playUK);
+        // uk.addEventListener('mouseover', playUK);
+        uk.setAttribute('style', style);
+        space.innerHTML = '&nbsp;&nbsp;';
+        audio.appendChild(us);
+        audio.appendChild(space);
+        audio.appendChild(uk);
+        // 翻译内容
         content.innerHTML = html;
+        content.insertBefore(audio, content.childNodes[0]);
         content.style.display = 'block';
+    }
+    /**美式发音*/
+    function playUS() {
+        var url = 'http://dict.youdao.com/dictvoice?audio=' + text + '&type=2';
+        var audio = new Audio();
+        ajax(url, function (rst, res) {
+            audio.src = URL.createObjectURL(res.response);
+            audio.play();
+        }, function (rst) {
+            log(rst);
+        }, {
+            responseType: 'blob'
+        });
+    }
+    /**英式发音*/
+    function playUK() {
+        var url = 'http://dict.youdao.com/dictvoice?audio=' + text + '&type=1';
+        var audio = new Audio();
+        ajax(url, function (rst, res) {
+            audio.src = URL.createObjectURL(res.response);
+            audio.play();
+        }, function (rst) {
+            log(rst);
+        }, {
+            responseType: 'blob'
+        });
     }
     /**有道词典排版*/
     function parseYoudao(rst) {
