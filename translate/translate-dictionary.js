@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：有道词典，金山词霸，谷歌翻译
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -103,6 +103,7 @@
     #google .confidence,
     #google .ld_result,
     #google .encodeHTML,
+    #google .replaceArray,
     #none {
         display: none;
     }
