@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：有道词典，金山词霸
 // @namespace    http://tampermonkey.net/
-// @version      0.6
+// @version      0.7
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -113,6 +113,7 @@
         'text-align:left!important;' +
         'border:0!important;' +
         'background:transparent!important;' +
+        'color:black!important;' +
         'z-index:2147483647!important;' +
         '');
     content.setAttribute('style', '' +
@@ -127,7 +128,12 @@
         'line-height:18px!important;' +
         '');
     // 添加翻译图标到 DOM
-    document.documentElement.appendChild(icon);
+    var root = document.createElement('div');
+    document.documentElement.appendChild(root);
+    var shadow = root.attachShadow({
+        mode: 'open'
+    });
+    shadow.appendChild(icon);
     // 鼠标事件：防止选中的文本消失
     document.addEventListener('mousedown', function (e) {
         if (e.target == icon || (e.target.parentNode && e.target.parentNode == icon)) { // 点击了翻译图标
