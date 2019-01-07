@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：有道词典，金山词霸，谷歌翻译
 // @namespace    http://tampermonkey.net/
-// @version      0.9
+// @version      1.0
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -124,12 +124,16 @@
         content: "]";
     }
 
+    #google .terms:before {
+        content: "【";
+    }
+
     #google .terms:after {
-        content: "⌟";
+        content: "】";
     }
     
     #google .terms {
-        margin-right: .7em;
+        margin-right: .2em;
     }
     `;
     var link = document.createElement('link');
@@ -337,9 +341,7 @@
         element.onmousedown = this.startDrag;
         element.onmouseup = this.stopDrag;
     }
-    /**
-     * 是否包含汉字
-     */
+    /**是否包含汉字*/
     function hasChineseByRange(str) {
         for (var i = 0; i < str.length; i++) {
             if (str.charCodeAt(i) >= 0x4E00 && str.charCodeAt(i) <= 0x9FBF) {
