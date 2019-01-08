@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：有道词典，金山词霸，谷歌翻译
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -102,8 +102,6 @@
     #google .src,
     #google .confidence,
     #google .ld_result,
-    #google .encodeHTML,
-    #google .replaceArray,
     #none {
         display: none;
     }
@@ -135,6 +133,43 @@
     
     #google .terms {
         margin-right: .2em;
+    }
+
+    #youdao .phone {
+        color: #777;
+    }
+
+    #youdao .phone:before {
+        content: "[";
+    }
+
+    #youdao .phone:after {
+        content: "]";
+    }
+
+    #youdao .phrs:before {
+        content: "[短语]";
+        display: block;
+    }
+
+    #youdao .trs>.tr>.exam:before {
+        content: "[例句]";
+        display: block;
+    }
+
+    #youdao .trs>.tr>.l:before {
+        content: "[释义]";
+        display: block;
+    }
+
+    #youdao [class="#text"] {
+        font-style: italic;
+    }
+
+    #youdao .return-phrase,
+    #youdao [class="@action"],
+    #none {
+        display: none;
     }
     `;
     var link = document.createElement('link');
@@ -355,26 +390,32 @@
     function objToXml(obj) {
         var xml = '';
         for (var prop in obj) {
-            xml += obj[prop] instanceof Array ? '' : "<" + prop + ">";
+            if (typeof obj[prop] === 'function') {
+                continue;
+            }
+            xml += obj[prop] instanceof Array ? '' : '<' + prop + '>';
             if (obj[prop] instanceof Array) {
                 for (var array in obj[prop]) {
-                    xml += "<" + prop + ">";
+                    if (typeof obj[prop][array] === 'function') {
+                        continue;
+                    }
+                    xml += '<' + prop + '>';
                     xml += objToXml(new Object(obj[prop][array]));
-                    xml += "</" + prop + ">";
+                    xml += '</' + prop + '>';
                 }
-            } else if (typeof obj[prop] == "object") {
+            } else if (typeof obj[prop] == 'object') {
                 xml += objToXml(new Object(obj[prop]));
             } else {
                 xml += obj[prop];
             }
-            xml += obj[prop] instanceof Array ? '' : "</" + prop + ">";
+            xml += obj[prop] instanceof Array ? '' : '</' + prop + '>';
         }
         var xml = xml.replace(/<\/?[0-9]{1,}>/g, '');
         return xml
     }
     /**xml 转 html*/
     function xmlToHtml(xml, tag) {
-        return xml.replace(/<([^/].+?)>/g, '<' + tag + ' class="$1">')
+        return xml.replace(/<([^/]+?)>/g, '<' + tag + ' class="$1">')
             .replace(/<\/(.+?)>/g, '</' + tag + '>');
     }
     /**ajax 跨域访问公共方法*/
@@ -487,10 +528,15 @@
             }
             // 中英翻译
             if (rstJson.ce_new && rstJson.ce_new.word) {
-                rstJson.ce_new.word.forEach(function (w) {
-                    if (w.phone)
-                        html += '<span style="' + phoneStyle + '">[' + w.phone + '] </span><br>';
-                });
+                html += '<div>' +
+                    '《新汉英大辞典》<br>' + xmlToHtml(objToXml(rstJson.ce_new.word), 'div') +
+                    '</div>';
+            }
+            // 中文翻译
+            if (rstJson.hh && rstJson.hh.word) {
+                html += '<div>' +
+                    '《现代汉语大词典》<br>' + xmlToHtml(objToXml(rstJson.hh.word), 'span') +
+                    '</div>';
             }
             // 长句翻译
             if (rstJson.fanyi && rstJson.fanyi.tran) {
