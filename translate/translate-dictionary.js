@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：有道词典，金山词霸，谷歌翻译
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -40,19 +40,33 @@
         vertical-align: middle;
     }
     
+    img:last-of-type {
+        margin-right: auto;
+    }
+    
+    img[activate],
+    img:hover {
+        border: 1px solid #c6c6c6;
+        -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
     tr-icon {
         display: none;
         position: absolute;
-        padding: 0;
+        padding: 1px;
         margin: 0;
         cursor: move;
         box-sizing: content-box;
         font-size: 13px;
         text-align: left;
         border: 0;
-        background: transparent;
         color: black;
         z-index: 2147483647;
+        background: #fff;
+        border-radius: 2px;
+        -webkit-box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
     }
     
     tr-audio {
@@ -70,14 +84,16 @@
         margin-right: auto;
     }
     
+    tr-audio a:hover {
+        text-decoration: underline;
+    }
+    
     tr-content {
         display: block;
         max-width: 400px;
         max-height: 200px;
         overflow: auto;
-        border: 1px solid #dfe1e5;
         background: white;
-        border-radius: 3px;
         padding: 2px 8px;
         margin-top: 5px;
         box-sizing: content-box;
@@ -122,11 +138,11 @@
     #google .pos:after {
         content: "]";
     }
-
+    
     #google .terms:before {
         content: "【";
     }
-
+    
     #google .terms:after {
         content: "】";
     }
@@ -134,38 +150,38 @@
     #google .terms {
         margin-right: .2em;
     }
-
+    
     #youdao .phone {
         color: #777;
     }
-
+    
     #youdao .phone:before {
         content: "[";
     }
-
+    
     #youdao .phone:after {
         content: "]";
     }
-
+    
     #youdao .phrs:before {
         content: "[短语]";
         display: block;
     }
-
+    
     #youdao .trs>.tr>.exam:before {
         content: "[例句]";
         display: block;
     }
-
+    
     #youdao .trs>.tr>.l:before {
         content: "[释义]";
         display: block;
     }
-
+    
     #youdao [class="#text"] {
         font-style: italic;
     }
-
+    
     #youdao .return-phrase,
     #youdao [class="@action"],
     #none {
@@ -259,10 +275,12 @@
         img.setAttribute('src', obj.image);
         img.setAttribute('alt', obj.name);
         img.setAttribute('title', obj.name);
+        img.setAttribute('id', obj.id);
         img.addEventListener('mouseup', function () {
             if (iconDrag.elementOriginalLeft == parseInt(icon.style.left) &&
                 iconDrag.elementOriginalTop == parseInt(icon.style.top)) { // 没有拖动鼠标抬起的时候触发点击事件
                 engineId = obj.id; // 翻译引擎 ID
+                engineActivateShow(); // 显示翻译引擎指示器
                 obj.trigger(selected); // 启动翻译引擎
             }
         });
@@ -310,6 +328,7 @@
             log('hide icon');
             icon.style.display = 'none';
             content.style.display = 'none';
+            engineActivateHide();
             // 强制设置鼠标拖动事件结束，防止由于网页本身的其它鼠标事件冲突而导致没有侦测到：mouseup
             iconDrag.dragging = false;
             iconDrag.unsetMouseMove();
@@ -322,6 +341,7 @@
         if (!window.getSelection().toString().trim()) {
             icon.style.display = 'none';
             content.style.display = 'none';
+            engineActivateHide();
         }
     });
     /**日志输出*/
@@ -470,6 +490,17 @@
         }
         content.style.display = 'block';
     }
+    /**隐藏翻译引擎指示器*/
+    function engineActivateHide() {
+        icon.querySelectorAll('img[activate]').forEach(function (ele) {
+            ele.removeAttribute('activate');
+        });
+    }
+    /**显示翻译引擎指示器*/
+    function engineActivateShow() {
+        engineActivateHide();
+        icon.querySelector('img#' + engineId).setAttribute('activate', 'activate');
+    }
     /**美式发音*/
     function playUS() {
         var url = 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=2';
@@ -509,20 +540,24 @@
                 var trs = word.trs,
                     ukphone = word.ukphone,
                     usphone = word.usphone,
-                    phone = word.phone;
+                    phone = word.phone,
+                    returnPhrase = word['return-phrase'];
+                if (returnPhrase && returnPhrase.l && returnPhrase.l.i) {
+                    html += '<div>' + returnPhrase.l.i + '</div>';
+                }
+                html += '<div>';
                 if (ukphone && ukphone.length != 0) {
-                    html += '<span style="' + phoneStyle + '">英[' + ukphone + '] </span>';
+                    html += '<span style="' + phoneStyle + '">[英] [' + ukphone + '] </span>';
                 }
                 if (usphone && usphone.length != 0) {
-                    html += '<span style="' + phoneStyle + '">美[' + usphone + '] </span>';
+                    html += '<span style="' + phoneStyle + '">[美] [' + usphone + '] </span>';
                 }
-                if (html.length != 0) {
-                    html += '<br>';
-                } else if (phone && phone.length != 0) {
-                    html += '<span style="' + phoneStyle + '">[' + phone + '] </span><br>';
+                html += '</div>';
+                if (phone && phone.length != 0) {
+                    html += '<div style="' + phoneStyle + '">[' + phone + '] </div>';
                 }
                 trs.forEach(element => {
-                    tr += element.tr[0].l.i[0] + '<br>';
+                    tr += '<div>' + element.tr[0].l.i[0] + '</div>';
                 });
                 html += tr;
             }
