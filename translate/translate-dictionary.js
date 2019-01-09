@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：有道词典，金山词霸，谷歌翻译
 // @namespace    http://tampermonkey.net/
-// @version      1.3
+// @version      1.4
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -44,17 +44,22 @@
         margin-right: auto;
     }
     
-    img[activate],
     img:hover {
         border: 1px solid #c6c6c6;
         -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
         box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
     }
     
+    img[activate] {
+        border: 1px solid transparent;
+        -webkit-box-shadow: 0px 0px 0px 1px #fc6;
+        box-shadow: 0px 0px 0px 1px #fc6;
+    }
+    
     tr-icon {
         display: none;
         position: absolute;
-        padding: 1px;
+        padding: 2px;
         margin: 0;
         cursor: move;
         box-sizing: content-box;
@@ -102,89 +107,89 @@
         line-height: 18px;
     }
     
-    #google .sentences,
-    #google .trans,
-    #google .orig,
-    #google .dict,
-    #google .pos,
-    #none {
+    .google .sentences,
+    .google .trans,
+    .google .orig,
+    .google .dict,
+    .google .pos,
+    .none {
         display: block;
     }
     
-    #google .backend,
-    #google .entry,
-    #google .base_form,
-    #google .pos_enum,
-    #google .src,
-    #google .confidence,
-    #google .ld_result,
-    #none {
+    .google .backend,
+    .google .entry,
+    .google .base_form,
+    .google .pos_enum,
+    .google .src,
+    .google .confidence,
+    .google .ld_result,
+    .none {
         display: none;
     }
     
-    #google .orig {
+    .google .orig {
         font-style: italic;
         color: #777;
     }
     
-    #google .pos {
+    .google .pos {
         margin-top: 1em;
     }
     
-    #google .pos:before {
+    .google .pos:before {
         content: "[";
     }
     
-    #google .pos:after {
+    .google .pos:after {
         content: "]";
     }
     
-    #google .terms:before {
+    .google .terms:before {
         content: "【";
     }
     
-    #google .terms:after {
+    .google .terms:after {
         content: "】";
     }
     
-    #google .terms {
+    .google .terms {
         margin-right: .2em;
     }
     
-    #youdao .phone {
+    .youdao .phone {
         color: #777;
     }
     
-    #youdao .phone:before {
+    .youdao .phone:before {
         content: "[";
     }
     
-    #youdao .phone:after {
+    .youdao .phone:after {
         content: "]";
     }
     
-    #youdao .phrs:before {
+    .youdao .phrs:before {
         content: "[短语]";
         display: block;
     }
     
-    #youdao .trs>.tr>.exam:before {
+    .youdao .trs>.tr>.exam:before {
         content: "[例句]";
         display: block;
     }
     
-    #youdao .trs>.tr>.l:before {
+    .youdao .trs>.tr>.l:before {
         content: "[释义]";
         display: block;
     }
     
-    #youdao [class="#text"] {
+    .youdao [class="#text"] {
         font-style: italic;
     }
     
-    #youdao .return-phrase,
-    #youdao [class="@action"],
-    #none {
+    .youdao .return-phrase,
+    .youdao [class="@action"],
+    .none {
         display: none;
     }
     `;
@@ -230,7 +235,7 @@
                 if (text.toLowerCase() != text) { // 再次翻译一遍小写的
                     ajax('http://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + text.toLowerCase(), function (rst) {
                         var reHtml = parseYoudao(rst);
-                        if (html !== reHtml) {
+                        if (html !== reHtml && reHtml.trim()) {
                             log(html, reHtml);
                             html += '<hr>' + reHtml;
                         }
@@ -250,11 +255,12 @@
         id: 'google',
         image: 'data:image/png;base64,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',
         trigger: function (text) {
-            var url = 'https://translate.google.cn/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&hl=zh-CN&sl=auto&tl=';
+            var url = 'https://translate.google.cn/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&hl=zh-CN&sl=auto';
+            url += '&tk=' + token(text);
             if (hasChineseByRange(text))
-                url += 'en&q=' + text;
+                url += '&tl=en&q=' + text;
             else
-                url += 'zh-CN&q=' + text;
+                url += '&tl=zh-CN&q=' + text;
             ajax(url, function (rst) {
                 var html = parseGoogle(rst);
                 showContent(html);
@@ -275,10 +281,9 @@
         img.setAttribute('src', obj.image);
         img.setAttribute('alt', obj.name);
         img.setAttribute('title', obj.name);
-        img.setAttribute('id', obj.id);
+        img.setAttribute('icon-id', obj.id);
         img.addEventListener('mouseup', function () {
-            if (iconDrag.elementOriginalLeft == parseInt(icon.style.left) &&
-                iconDrag.elementOriginalTop == parseInt(icon.style.top)) { // 没有拖动鼠标抬起的时候触发点击事件
+            if (!isDrag()) { // 没有拖动鼠标抬起的时候触发点击事件
                 engineId = obj.id; // 翻译引擎 ID
                 engineActivateShow(); // 显示翻译引擎指示器
                 obj.trigger(selected); // 启动翻译引擎
@@ -329,9 +334,7 @@
             icon.style.display = 'none';
             content.style.display = 'none';
             engineActivateHide();
-            // 强制设置鼠标拖动事件结束，防止由于网页本身的其它鼠标事件冲突而导致没有侦测到：mouseup
-            iconDrag.dragging = false;
-            iconDrag.unsetMouseMove();
+            forceStopDrag();
         }
     });
     // 选中变化事件：当点击已经选中的文本的时候，隐藏翻译图标和翻译面板（此时浏览器动作是：选中的文本已经取消选中了）
@@ -342,6 +345,7 @@
             icon.style.display = 'none';
             content.style.display = 'none';
             engineActivateHide();
+            forceStopDrag();
         }
     });
     /**日志输出*/
@@ -358,14 +362,17 @@
     /**鼠标拖动*/
     function Drag(element) {
         this.dragging = false;
+        this.startDragTime = 0;
+        this.stopDragTime = 0;
         this.mouseDownPositionX = 0;
         this.mouseDownPositionY = 0;
-        this.elementOriginalLeft = 0;
-        this.elementOriginalTop = 0;
+        this.elementOriginalLeft = parseInt(element.style.left);
+        this.elementOriginalTop = parseInt(element.style.top);
         var ref = this;
         this.startDrag = function (e) {
             e.preventDefault();
             ref.dragging = true;
+            ref.startDragTime = new Date().getTime();
             ref.mouseDownPositionX = e.clientX;
             ref.mouseDownPositionY = e.clientY;
             ref.elementOriginalLeft = parseInt(element.style.left);
@@ -381,6 +388,7 @@
         this.stopDrag = function (e) {
             e.preventDefault();
             ref.dragging = false;
+            ref.stopDragTime = new Date().getTime();
             ref.unsetMouseMove();
             log('stopDrag');
         };
@@ -396,6 +404,19 @@
         };
         element.onmousedown = this.startDrag;
         element.onmouseup = this.stopDrag;
+    }
+    /**是否拖动图标*/
+    function isDrag() {
+        return iconDrag.elementOriginalLeft != parseInt(icon.style.left) ||
+            iconDrag.elementOriginalTop != parseInt(icon.style.top);
+    }
+    /**强制结束拖动*/
+    function forceStopDrag() {
+        if (iconDrag) {
+            // 强制设置鼠标拖动事件结束，防止由于网页本身的其它鼠标事件冲突而导致没有侦测到：mouseup
+            iconDrag.dragging = false;
+            iconDrag.unsetMouseMove();
+        }
     }
     /**是否包含汉字*/
     function hasChineseByRange(str) {
@@ -475,16 +496,16 @@
 
         us.innerHTML = '♪US';
         us.setAttribute('href', 'javascript:void(0)');
-        us.addEventListener('click', playUS);
+        us.addEventListener('mouseup', playUS);
         // us.addEventListener('mouseover', playUS);
         uk.innerHTML = '♪UK';
         uk.setAttribute('href', 'javascript:void(0)');
-        uk.addEventListener('click', playUK);
+        uk.addEventListener('mouseup', playUK);
         // uk.addEventListener('mouseover', playUK);
         audio.appendChild(us);
         audio.appendChild(uk);
         // 翻译内容
-        content.innerHTML = '<div id="' + engineId + '">' + html + '</div>';
+        content.innerHTML = '<div class="' + engineId + '">' + html + '</div>';
         if (engineId != 'google') { // 谷歌翻译不显示发音图标
             content.insertBefore(audio, content.childNodes[0]);
         }
@@ -499,10 +520,13 @@
     /**显示翻译引擎指示器*/
     function engineActivateShow() {
         engineActivateHide();
-        icon.querySelector('img#' + engineId).setAttribute('activate', 'activate');
+        icon.querySelector('img[icon-id="' + engineId + '"').setAttribute('activate', 'activate');
     }
     /**美式发音*/
     function playUS() {
+        if (isDrag()) { // 拖动时候不触发发音
+            return;
+        }
         var url = 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=2';
         var audio = new Audio();
         ajax(url, function (rst, res) {
@@ -516,6 +540,9 @@
     }
     /**英式发音*/
     function playUK() {
+        if (isDrag()) { // 拖动时候不触发发音
+            return;
+        }
         var url = 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=1';
         var audio = new Audio();
         ajax(url, function (rst, res) {
@@ -615,5 +642,43 @@
             log(error);
             return error;
         }
+    }
+    /**
+     * 谷歌翻译 token 计算
+     * https://github.com/hujingshuang/MTrans
+     * */
+    function token(a) {
+        var k = "";
+        var b = 406644;
+        var b1 = 3293161072;
+
+        var jd = ".";
+        var sb = "+-a^+6";
+        var Zb = "+-3^+b+-f";
+
+        for (var e = [], f = 0, g = 0; g < a.length; g++) {
+            var m = a.charCodeAt(g);
+            128 > m ? e[f++] = m : (2048 > m ? e[f++] = m >> 6 | 192 : (55296 == (m & 64512) && g + 1 < a.length && 56320 == (a.charCodeAt(g + 1) & 64512) ? (m = 65536 + ((m & 1023) << 10) + (a.charCodeAt(++g) & 1023), e[f++] = m >> 18 | 240, e[f++] = m >> 12 & 63 | 128) : e[f++] = m >> 12 | 224, e[f++] = m >> 6 & 63 | 128), e[f++] = m & 63 | 128)
+        }
+        a = b;
+        for (f = 0; f < e.length; f++) a += e[f],
+            a = RL(a, sb);
+        a = RL(a, Zb);
+        a ^= b1 || 0;
+        0 > a && (a = (a & 2147483647) + 2147483648);
+        a %= 1E6;
+        return a.toString() + jd + (a ^ b)
+    };
+
+    function RL(a, b) {
+        var t = "a";
+        var Yb = "+";
+        for (var c = 0; c < b.length - 2; c += 3) {
+            var d = b.charAt(c + 2),
+                d = d >= t ? d.charCodeAt(0) - 87 : Number(d),
+                d = b.charAt(c + 1) == Yb ? a >>> d : a << d;
+            a = b.charAt(c) == Yb ? a + d & 4294967295 : a ^ d
+        }
+        return a
     }
 })();
