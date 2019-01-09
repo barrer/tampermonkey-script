@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：有道词典，金山词霸，谷歌翻译
 // @namespace    http://tampermonkey.net/
-// @version      1.4
+// @version      1.5
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -276,6 +276,7 @@
         engineId;
     // 绑定图标拖动事件
     var iconDrag = new Drag(icon);
+    // 添加翻译引擎图标
     iconArray.forEach(function (obj) {
         var img = document.createElement('img');
         img.setAttribute('src', obj.image);
@@ -291,8 +292,9 @@
         });
         icon.appendChild(img);
     });
-    icon.appendChild(content); // 内容面板放图标后面
-    // 添加翻译图标到 DOM
+    // 添加内容面板（放图标后面）
+    icon.appendChild(content);
+    // 添加样式、翻译图标到 DOM
     var root = document.createElement('div');
     document.documentElement.appendChild(root);
     var shadow = root.attachShadow({
@@ -320,7 +322,7 @@
         }
         selected = window.getSelection().toString().trim(); // 当前选中文本
         log('click text:' + selected);
-        if (selected && icon.style.display == 'none') {
+        if (selected && icon.style.display == 'none') { // 显示翻译图标
             log('show icon');
             log(selected + ' | ' + e.pageX + ' | ' + e.pageY);
             icon.style.top = e.pageY + 10 + 'px';
@@ -329,7 +331,7 @@
             // 兼容部分 Content Security Policy
             icon.style.position = 'absolute';
             icon.style.zIndex = '2147483647';
-        } else if (!selected) {
+        } else if (!selected) { // 隐藏翻译图标
             log('hide icon');
             icon.style.display = 'none';
             content.style.display = 'none';
@@ -337,7 +339,7 @@
             forceStopDrag();
         }
     });
-    // 选中变化事件：当点击已经选中的文本的时候，隐藏翻译图标和翻译面板（此时浏览器动作是：选中的文本已经取消选中了）
+    // 选中变化事件：当点击已经选中的文本的时候，隐藏翻译图标（此时浏览器动作是：选中的文本已经取消选中了）
     document.addEventListener("selectionchange", function (e) {
         log('selectionchange event:', e);
         log('selectionchange:' + window.getSelection().toString());
