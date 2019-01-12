@@ -7,7 +7,7 @@
 ![translate](translate/translate.png)
 
 特色：  
-* 划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster”网页翻译
+* 划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、汉典”网页翻译
 * 支持顺序自定义
 * 支持隐藏图标
 * 支持显示更多图标
