@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      3.7
+// @version      3.8
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、汉典”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
