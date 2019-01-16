@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         划词翻译：有道词典，金山词霸，谷歌翻译
+// @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      1.5
-// @description  划词翻译调用“有道词典（有道翻译）、金山词霸、谷歌翻译”
+// @version      1.6
+// @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
 // @include      https://*/*
@@ -11,6 +11,10 @@
 // @connect      dict.youdao.com
 // @connect      open.iciba.com
 // @connect      translate.google.cn
+// @connect      hjenglish.com
+// @connect      hjapi.com
+// @connect      hjfile.cn
+// @connect      cn.bing.com
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -23,6 +27,16 @@
     style.textContent = `
     * {
         word-wrap: break-word !important
+    }
+    
+    a {
+        color: #36f;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    a:hover {
+        text-decoration: underline;
     }
     
     img {
@@ -52,8 +66,8 @@
     
     img[activate] {
         border: 1px solid transparent;
-        -webkit-box-shadow: 0px 0px 0px 1px #fc6;
-        box-shadow: 0px 0px 0px 1px #fc6;
+        -webkit-box-shadow: 0px 0px 0px 1px #f90;
+        box-shadow: 0px 0px 0px 1px #f90;
     }
     
     tr-icon {
@@ -105,6 +119,34 @@
         font-family: "Helvetica Neue", "Helvetica", "Arial", "sans-serif";
         font-size: 14px;
         line-height: 18px;
+    }
+    
+    a.audio-button{
+        color: #36f;
+        text-decoration: none;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+    
+    a.audio-button:last-of-type {
+        margin-right: auto;
+    }
+    
+    a.audio-button:hover {
+        text-decoration: underline;
+    }
+
+    .br {
+        border-top: 1px dashed #777;
+        margin: .5em auto .3em auto;
+    }
+    
+    .list-title~.list-title {
+        margin-top: 1em;
+    }
+    
+    .list-title {
+        color: #00c;
     }
     
     .google .sentences,
@@ -192,6 +234,141 @@
     .none {
         display: none;
     }
+    
+    .hjenglish dl,
+    .hjenglish dt,
+    .hjenglish dd,
+    .hjenglish p,
+    .hjenglish ul,
+    .hjenglish li,
+    .hjenglish h3 {
+        margin: 0;
+        padding: 0;
+        margin-block-start: 0px;
+        margin-block-end: 0px;
+        margin-inline-start: 0px;
+        margin-inline-end: 0px;
+    }
+    
+    .hjenglish h3 {
+        font-size: 1em;
+        font-weight: normal;
+    }
+    
+    .hjenglish .detail-pron,
+    .hjenglish .pronounces {
+        color: #777;
+    }
+    
+    .hjenglish ul {
+        margin-left: 2em;
+    }
+    
+    /*例句*/
+    .hjenglish .def-sentence-from,
+    .hjenglish .def-sentence-to {
+        display: none;
+    }
+    
+    .hjenglish .detail-groups dd h3:before {
+        counter-increment: eq;
+        content: counter(eq) ".";
+        display: block;
+        width: 22px;
+        float: left;
+    }
+    
+    .hjenglish .detail-groups dl {
+        counter-reset: eq;
+        margin-bottom: .5em;
+        clear: both;
+    }
+    
+    .hjenglish ol,
+    .hjenglish ul {
+        list-style: none;
+    }
+
+    .bing h1,
+    .bing strong {
+        font-size: 1em;
+        font-weight: normal;
+        margin: 0;
+        padding: 0;
+    }
+
+    .bing .concise ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .bing .concise .pos {
+        margin-right: .2em;
+    }
+
+    .bing .concise .web {
+        margin-right: auto;
+    }
+
+    .bing .concise .web:after {
+        content: "："
+    }
+
+    .bing .oald {
+        margin-top: .4em;
+    }
+
+    .bing .hd_tf_lh div {
+        display: inline;
+        color: #777;
+    }
+    
+    .bing #authid td:first-child {
+        width: 22px;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .bing .def_row {
+        vertical-align: top;
+    }
+    
+    .bing .bil_dis,
+    .bing .val_dis {
+        padding-right: .25em;
+    }
+    
+    /*例句*/
+    .bing .li_exs {
+        display: none;
+    }
+    
+    .bing .li_id {
+        border: 1px solid #ebebeb;
+        padding: .2em;
+    }
+    
+    .bing .infor,
+    .bing .sen_com,
+    .bing .com_sep,
+    .bing .bil,
+    .bing .gra {
+        padding-right: .25em;
+    }
+
+    .bing .infor,
+    .bing .label {
+        padding-left: .25em;
+    }
+    
+    .bing .each_seg+.each_seg {
+        margin-top: .5em;
+    }
+    
+    .bing .de_co div {
+        display: inline;
+    }
     `;
     var link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -199,61 +376,122 @@
     link.href = URL.createObjectURL(new Blob([style.textContent], {
         type: 'text/css;charset=UTF-8'
     }));
+    // 翻译图标、内容面板、当前选中文本、当前翻译引擎
+    var icon = document.createElement('tr-icon'),
+        content = document.createElement('tr-content'),
+        selected,
+        engineId;
+    // 发音引擎
+    var audioEngines = []; // [{name: 'abc', url: 'http://*.mp3', ...}, ...]
+    // 翻译引擎结果集
+    var engineResult = {}; // id: DOM 
+    // ID 类别
+    var ids = {
+        ICIBA: 'iciba',
+        ICIBA_LOWER_CASE: 'icibaLowerCase',
+        YOUDAO: 'youdao',
+        YOUDAO_LOWER_CASE: 'youdaoLowerCase',
+        BING: 'bing',
+        BING_LOWER_CASE: 'bingLowerCase',
+        HJENGLISH: 'hjenglish',
+        GOOGLE: 'google'
+    };
+    var idsExtension = {
+        LIST_DICT: [ids.ICIBA, ids.YOUDAO, ids.BING, ids.HJENGLISH],
+        LIST_DICT_LOWER_CASE: [ids.ICIBA, ids.ICIBA_LOWER_CASE, ids.YOUDAO, ids.YOUDAO_LOWER_CASE, ids.BING, ids.BING_LOWER_CASE, ids.HJENGLISH],
+        LIST_GOOGLE: [ids.GOOGLE],
+        lowerCaseMap: (function () {
+            var obj = {};
+            obj[ids.ICIBA_LOWER_CASE] = ids.ICIBA;
+            obj[ids.YOUDAO_LOWER_CASE] = ids.YOUDAO;
+            obj[ids.BING_LOWER_CASE] = ids.BING;
+            return obj;
+        })(),
+        names: (function () {
+            var obj = {};
+            obj[ids.ICIBA] = '《金山词霸》';
+            obj[ids.ICIBA_LOWER_CASE] = '';
+            obj[ids.YOUDAO] = '《有道词典》';
+            obj[ids.YOUDAO_LOWER_CASE] = '';
+            obj[ids.BING] = '《Bing 词典》';
+            obj[ids.BING_LOWER_CASE] = '';
+            obj[ids.HJENGLISH] = '《沪江小D》';
+            obj[ids.GOOGLE] = '';
+            return obj;
+        })()
+    }
+    // 绑定图标拖动事件
+    var iconDrag = new Drag(icon);
     // 图标数组
     var iconArray = [{
-        name: '金山词霸',
-        id: 'iciba',
-        image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAABgFBMVEX////1AUv2DlT1A0z5ZpP2EVb/+fv2JGT1DFP+7/T//f7+4uv/9vn2HV/+6/H+5u32Gl3//P34ToH1CVH3LGn91eH8q8T4VYb2FVn6hqr/+/z5Y5D8p8H3Pnb4RHr4QXj3MW3+6e/5aZT1B0/3PXX6fqP5c5v7o776g6f4TID7n7v3KWf6iaz7lrX7jK78rMT9ztz2GFv9yNj1BE3+8fX4V4j3NG/4Rnz1BU7/8/f9w9X/+vv5a5b/9/n5Xo3+2+b8rsb8tsv8ssn9ytr8qcL+7fL90t/5W4v2HF79wtT3Kmj9xtf4UIP8vdD/9fj+2uX92OP8qsP+3+j/+Pr+4er+7vP2IWL+8vb+3ef5cJn8v9L7krL4WIj3OXL5bpj7nbr5bJf3L2v6gKX7mLb7k7P4SX78uM34U4X8t8z2ImL8u8/3N3H2IGH9wNP6dp76eJ/5cZr2H2D6iKv+5Oz/9Pf5apX6f6T+5+790+D91+P6eqD8tMr7j7D7m7j9zNv5Yo8kSjR+AAAAAXRSTlMAQObYZgAAA+lJREFUeF7t2mXP6koYheG1iru/7u7u7m7b3f24u/z1k+wEAnSGaUuB82GuP/DcaQaeoQGOaZo2SbGTbdTF1yuNnX+7pbHzD8cbOz860Nj5qTTFOuo0/5gSxhzqoZ1Sxj5qLvUvKzDm6vP85YxL1NTmBRUye6ih0ACVPH+jZiJZWjGIGplL0prFK9RCR4ZWLUXgutQfFBJXtVzCZfEuCp1ceyniaYWrzmOy9SP9ZljuhWvCrZWuH/40hWY/wiWJLooFHgIVCrixCjfcaqHYeASoXHD/FFU7fEqJpTjy/B8o4Q2hOjuzlOhasLQjZw9QhcQHyjT7UWKIMt2/waHwpEGZoTDKTFBm/vkhnJhbooznLcwO+inj+yEKu+JeD2WCexA59VEq9qYNdvinfJT66ghi2+OUC4zZSGj6RLmBXsgsjLKCwJsoLHn8jBV4/aqdKZdsvQelmWVW0K+6cO34WEnw5xvF+AtWEpuDyvYrVra80+Z0PJfjUIv2USE5+BAi54rxnpEwLJn2UaXzxQOUed+t6r6EVZFOKmWap6Mo8A/3UGE0DuvCUxmqnaXyK7c1SYX+J7Ant0Sl6Xxulg2RRt57NkLwLgq22ABTKMBhC+uupw1FOlgzBoU8+yiRptjWBqvU2zdPgecoFRGGBr7Aa1YJyI3SJLlg4d3vyrdXqD5AvOAPYDLAMp05wKUAYK90Ry7DLLfCYrPDgIsBCHecsSBzDYHiy8z8yxBcCzAn/AKRq0/M6z4CXA8AwtM9JMnAJoR287feJsC9AMHS/wiJZpIMjkRRuwBgv3kRMgmDnvYEUNMAIAypt11HKLMZEupjudaQGOwIw6pHLPcXXKIDdIAO0AFjrKUxKOkAHaADdIAO0AE6wB8qcys27PCHyajxujdUyg+7Is1kcMbRhWSYZOxFG6qxPhEkyWTEQcBdH0ly/ADOXZ7xM756YDsg3J1P69mFM4ljFqRTdgMmWMDOU9jXNmWwyDc2A2b6WezdDGxay7LUmK2A1QDLLN7Aht4tlutfsxPQTpP5PlgWjdFs9kfrAR2KPaD0p4dmX96xGnAdpNl3sGOKAu0WA+700Kwr5cLfFietBbykWeAQ9vg7SeFBVAc00czIwa74feFBVAfcBGni2YN9OUN4EFUBP2VpNgITpx+FIVXAMc2ewpkJmnjvKQKmRY8tCocWWSp7rj6ETQGW+f5XOLWaZZHMxDrUAVh/28JixhGc2/axYPS21V2wOhhkgWcX1djLH8STJjvbMOGdzwc8gV2i1/WeRws27wO/X/CzDVQrTXLpHwd3wrVnJN+lYBHr7bEO0AE6QAfoAB2gA/C/oGnaf/DSo5D7etMMAAAAAElFTkSuQmCC',
+        name: '多词典查询',
+        id: 'icon-dict',
+        image: 'data:image/png;base64,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',
         trigger: function (text) {
-            ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + text, function (rst) {
-                var html = parseIciba(rst);
-                if (text.toLowerCase() != text) { // 再次翻译一遍小写的
-                    ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + text.toLowerCase(), function (rst) {
-                        var reHtml = parseIciba(rst);
-                        if (html !== reHtml) {
-                            log(html, reHtml);
-                            html += '<hr>' + reHtml;
-                        }
-                        showContent(html);
-                    }, function (rst) {
-                        showContent(html + '<hr>' + 'error: 无法连接翻译服务');
-                    });
-                } else {
-                    showContent(html);
-                }
+            var idsType = idsExtension.LIST_DICT;
+            if (text != text.toLowerCase()) {
+                idsType = idsExtension.LIST_DICT_LOWER_CASE;
+            }
+            ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text), function (rst) {
+                engineResult[ids.ICIBA] = parseIciba(rst);
+                showContent(idsType);
             }, function (rst) {
-                showContent('error: 无法连接翻译服务');
+                engineResult[ids.ICIBA] = htmlToDom('error: 无法连接翻译服务');
+                showContent(idsType);
             });
-        }
-    }, {
-        name: '有道词典',
-        id: 'youdao',
-        image: 'data:image/png;base64,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',
-        trigger: function (text) {
-            ajax('http://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + text, function (rst) {
-                var html = parseYoudao(rst);
-                if (text.toLowerCase() != text) { // 再次翻译一遍小写的
-                    ajax('http://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + text.toLowerCase(), function (rst) {
-                        var reHtml = parseYoudao(rst);
-                        if (html !== reHtml && reHtml.trim()) {
-                            log(html, reHtml);
-                            html += '<hr>' + reHtml;
-                        }
-                        showContent(html);
-                    }, function (rst) {
-                        showContent(html + '<hr>' + 'error: 无法连接翻译服务');
-                    });
-                } else {
-                    showContent(html);
-                }
+            ajax('http://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + encodeURIComponent(text), function (rst) {
+                engineResult[ids.YOUDAO] = parseYoudao(rst);
+                showContent(idsType);
             }, function (rst) {
-                showContent('error: 无法连接翻译服务');
+                engineResult[ids.YOUDAO] = htmlToDom('error: 无法连接翻译服务');
+                showContent(idsType);
             });
+            ajax('https://cn.bing.com/dict/search?q=' + encodeURIComponent(text), function (rst) {
+                engineResult[ids.BING] = parseBing(rst);
+                showContent(idsType);
+            }, function (rst) {
+                engineResult[ids.BING] = htmlToDom('error: 无法连接翻译服务');
+                showContent(idsType);
+            });
+            ajax('https://dict.hjenglish.com/w/' + encodeURIComponent(text), function (rst) {
+                engineResult[ids.HJENGLISH] = parseHjenglish(rst);
+                showContent(idsType);
+            }, function (rst) {
+                engineResult[ids.HJENGLISH] = htmlToDom('error: 无法连接翻译服务');
+                showContent(idsType);
+            }, {
+                headers: {
+                    'Cookie': 'HJ_SID=' + uuid() + '; HJ_SSID_3=' + uuid() + '; HJ_CST=1; HJ_CSST_3=1; HJ_UID=' + uuid()
+                }
+            });
+            if (text != text.toLowerCase()) { // 小写再请求一次
+                ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text.toLowerCase()), function (rst) {
+                    engineResult[ids.ICIBA_LOWER_CASE] = parseIciba(rst);
+                    showContent(idsType);
+                }, function (rst) {
+                    engineResult[ids.ICIBA_LOWER_CASE] = htmlToDom('error: 无法连接翻译服务');
+                    showContent(idsType);
+                });
+                ajax('http://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + encodeURIComponent(text.toLowerCase()), function (rst) {
+                    engineResult[ids.YOUDAO_LOWER_CASE] = parseYoudao(rst);
+                    showContent(idsType);
+                }, function (rst) {
+                    engineResult[ids.YOUDAO_LOWER_CASE] = htmlToDom('error: 无法连接翻译服务');
+                    showContent(idsType);
+                });
+                ajax('https://cn.bing.com/dict/search?q=' + encodeURIComponent(text.toLowerCase()), function (rst) {
+                    engineResult[ids.BING_LOWER_CASE] = parseBing(rst);
+                    showContent(idsType);
+                }, function (rst) {
+                    engineResult[ids.BING_LOWER_CASE] = htmlToDom('error: 无法连接翻译服务');
+                    showContent(idsType);
+                });
+            }
         }
     }, {
         name: '谷歌翻译',
-        id: 'google',
-        image: 'data:image/png;base64,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',
+        id: 'icon-google',
+        image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAwFBMVEX////x+Pu83vl9vvRQq/Q0nvQsm/STyfXY6/pktfYjmfUhlvOr1Pb2+/0+pPT6/P3K4/f8/f0ak/Px8/Xz9vf2+Pn5+vrk6ezt8PLs7/H//vr18/ETkPP6/Pr59fL9+/rq7fDf7/wJi/PE2/DM09edqK6psrfZ4OZzg4s6UFtHXGb9+fS/x8xic3oPkvuQnaSCkZixu8Egm/wjjuEyaZItRVAwhNN2rOBQltkgfNQnlOw2l+UfjeoKgeZCmugYddL/Jsx8AAAAAXRSTlMAQObYZgAABd1JREFUeAHs01uyoyAQxvEoN6HVo2AINhqSzGX/S5zXmTpUBTN2+eJ/A/yqv+JydnZ2dnZ2dpatqhkX8k1CVReiGi0NvE+0F5K6tjdQktE0J2gFFNY3JPfvoTRJsUGlDZRmdLc/oJZQEOEGDAqi3IDDlvTX7gABWxL7byBhS0YdDABeHQwQw3gsANTlYADvDgbI+mssiwhglZtcQdPVjyQA4LcwFxWmESkA0MYwl+X8SACwrBgwB48EgP4W59LcSACQ+Q3yTePuAFiYKz9BWP8DYG0ewIctJ/gYYI1WHDIGC+29HOA+B7BqbPjyXWAXNm/Y4FOAFQ3iqGDJbNAP90AP0FVKWPc5gGmjIwdAu64enbbZDR6RHCCeyXtEZTInePVDDMQAy3zyq8cht4E1KsYHMaBOPqHHrmQDAsDCnyldm2vCVtrcBj/ugRbA1oQ1C4gNz/0DUDFSAqysEZGJAbFj2Q307f73Ky7sDOAuoeMv1SG24vsJzD8bPMI0TW5PgLUKE9bmpZ+Iz7cbhPDz1+/brgA5YFqZfYka0bM/7ZqHduq8EkYD5mJMR8UWioINiZvAaffQTn3/t/pHoqQpzUq8GvuU9Mxe80kjJdAxLcOHDBhJs1wm+CsFPAqrrz+bzZwa5/VXMphTovHDhczzbLB7k5IdLCovgFD3Igzr7XZTNFQGnjCmFEWBJooSEChY8BhMLDqgDsILf+gqpiHnrulmct2Ibw5kUspi//rtrX5xlxJWVgAJaLzvX3BF6PvmI/H+/z/yIxLYv7rcvyfGNCor0OnyMOR7Qp8Tb2YQQCBgYGeyXGbRoKQAEo0WCNT2+DAS3Q4yGKzkA7l8ToxJaQHH52HLdVyF0yUhHIkz05F4Ex+50a8ncQEuWQwsIlx2EYpml/MLVwgkADj6Oa85AplmEfXJE3haQAZ3vk8oLb8L9NbDnkCamQAd3jVeS7zpHO8hGKAj2I/LLB3AW6z0IEIdJ+Sj4eEQRnocDxuGDMT/nl3PaZDB+rsJiNUkFDB+Q989tLz9egYIuXAxY0cHTFUDigXFNgIIeSqBBjoKITd8JQPhtSaYHLtN0l0D6NhOwOUcxjB6HDXnrVcymF/dXR32G0mk1A2wEhD9uuo4enzswHt6r2SQZkt5N9IlSVAcGmAhgIRX4+G0jx6/y+XqSDSNAu9OLvPiasSgEI2lhNcpthIQbah20VUJPM1g6pky6K+LpcxvGYx9/0o3ICJ29wGI9UW/RVOnYupA04mhqgqBwBaUS2gAsxOAKcB6z2+BwmPmSQAfWWRL1XhObtQpFGNieyNCTc/poxfvc00/n+glC7chGP/B3e4FZdZXMgQYflWi32mcRRCClLcF1JcQQGQtYCx1lDIcHEG2VMXhb0JwZHUpLYFatFew/BR6B1QtgJBD+aJQDSjSEateQF2f5om+EBUJrr4DKgNX1c9ztQaY9SIswf1G1S+kMojHYFCxQPt+q34quUt2BsxnUdUd+PkD6o/8gwH0oFqBNloViwEhdG8QUValACB+LTiJop3BUq+DigWa3TmUBIO7nUFEqhVASP/K7GAAhzPGFQoAqD+c6FrE1z24DchnBPr2Ah13wg4GhboVfaoDDXsB5EEGGkwWt3GK2WcEnLa1gThkADCMP7kNh1+wCNqHDADGPjkJe/YtQMJj5yV/UQlM+1+SQXmBUd3aQP+YWlIA6NU96xY0gtICwKjlfrgJbROdmccsBIBa3XW8D/Hzt4E/f4c2EWh6telHaK3/bZ/z79/qEuqXEShB999LVt3J+bgqAbZ5KeBC/coERs7z8lvnfDKuSgC4XD0TWJ/Px1UK0M32af0I6lcnALhPBDYB1K9WYLp6XD/lzO75AyVYP7RgdclxZPEMCttluOrOz9+pz/yvF6htDhsQBkBk/TyeEjj7DJzJ5L36DOp/WwZrNh+/A6Nn30FNj4J1MGHv1udn34ILLdgM36vP8ODsm8Dr7TqdYPYWmPgl8q+AEydOnDhx4sR/q8tILrvoB2AAAAAASUVORK5CYII=',
         trigger: function (text) {
             var url = 'https://translate.google.cn/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&hl=zh-CN&sl=auto';
             url += '&tk=' + token(text);
@@ -262,20 +500,14 @@
             else
                 url += '&tl=zh-CN&q=' + text;
             ajax(url, function (rst) {
-                var html = parseGoogle(rst);
-                showContent(html);
+                engineResult[ids.GOOGLE] = parseGoogle(rst);
+                showContent(idsExtension.LIST_GOOGLE);
             }, function (rst) {
-                showContent('error: 无法连接翻译服务');
+                engineResult[ids.GOOGLE] = htmlToDom('error: 无法连接翻译服务');
+                showContent(idsExtension.LIST_GOOGLE);
             });
         }
     }];
-    // 翻译图标、内容面板、当前选中文本、当前翻译引擎
-    var icon = document.createElement('tr-icon'),
-        content = document.createElement('tr-content'),
-        selected,
-        engineId;
-    // 绑定图标拖动事件
-    var iconDrag = new Drag(icon);
     // 添加翻译引擎图标
     iconArray.forEach(function (obj) {
         var img = document.createElement('img');
@@ -285,8 +517,12 @@
         img.setAttribute('icon-id', obj.id);
         img.addEventListener('mouseup', function () {
             if (!isDrag()) { // 没有拖动鼠标抬起的时候触发点击事件
+                if (engineId == obj.id)
+                    return; // 已经是当前翻译引擎
                 engineId = obj.id; // 翻译引擎 ID
                 engineActivateShow(); // 显示翻译引擎指示器
+                audioEngines = []; // 清空发音引擎
+                engineResult = {}; // 清空翻译引擎结果集
                 obj.trigger(selected); // 启动翻译引擎
             }
         });
@@ -332,27 +568,34 @@
             icon.style.position = 'absolute';
             icon.style.zIndex = '2147483647';
         } else if (!selected) { // 隐藏翻译图标
-            log('hide icon');
-            icon.style.display = 'none';
-            content.style.display = 'none';
-            engineActivateHide();
-            forceStopDrag();
+            log('hide icon:mouseup');
+            hideIcon();
         }
     });
     // 选中变化事件：当点击已经选中的文本的时候，隐藏翻译图标（此时浏览器动作是：选中的文本已经取消选中了）
-    document.addEventListener("selectionchange", function (e) {
+    document.addEventListener('selectionchange', function (e) {
         log('selectionchange event:', e);
         log('selectionchange:' + window.getSelection().toString());
         if (!window.getSelection().toString().trim()) {
-            icon.style.display = 'none';
-            content.style.display = 'none';
-            engineActivateHide();
-            forceStopDrag();
+            log('hide icon:selectionchange');
+            hideIcon();
+        }
+    });
+    // 内容面板滚动事件
+    content.addEventListener('scroll', function (e) {
+        if (content.scrollHeight - content.scrollTop === content.clientHeight) {
+            log('scroll bottom', e);
+            e.preventDefault();
+            e.stopPropagation();
+        } else if (content.scrollTop === 0) {
+            log('scroll top', e);
+            e.preventDefault();
+            e.stopPropagation();
         }
     });
     /**日志输出*/
     function log() {
-        var debug = false;
+        var debug = true;
         if (!debug)
             return;
         if (arguments) {
@@ -429,6 +672,14 @@
         }
         return false;
     }
+    /**uuid*/
+    function uuid() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0,
+                v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
     /**对象转 xml*/
     function objToXml(obj) {
         var xml = '';
@@ -461,6 +712,20 @@
         return xml.replace(/<([^/]+?)>/g, '<' + tag + ' class="$1">')
             .replace(/<\/(.+?)>/g, '</' + tag + '>');
     }
+    // html 字符串转 DOM
+    function htmlToDom(htmlStr) {
+        var div = document.createElement('div');
+        div.innerHTML = htmlStr;
+        return div;
+    }
+    /**清理 html*/
+    function cleanHtml(htmlStr) {
+        return htmlStr.replace(/<script[\s\S]*?<\/script>/ig, '')
+            .replace(/<link[\s\S]*?>/ig, '')
+            .replace(/<style[\s\S]*?<\/style>/ig, '')
+            .replace(/<img[\s\S]*?>/ig, '')
+            .replace(/on[a-z]*=".*?"/ig, '');
+    }
     /**ajax 跨域访问公共方法*/
     function ajax(url, success, error, obj) {
         if (!!!obj)
@@ -470,7 +735,7 @@
         // >>>因为Tampermonkey跨域访问(a.com)时会自动携带对应域名(a.com)的对应cookie
         // 不会携带当前域名的cookie
         // 所以，GM_xmlhttpRequest【不存在】cookie跨域访问安全性问题
-        // 以下设置默认headers不起作用<<<
+        // 以下设置的cookie会添加到已有cookie的后面<<<
         if (!!!obj.headers)
             obj.headers = {
                 'cookie': ''
@@ -486,32 +751,81 @@
             },
             onerror: function (res) {
                 error(res.responseText, res, obj);
+            },
+            onabort: function (res) {
+                error('the request was aborted', res, obj);
+            },
+            ontimeout: function (res) {
+                error('the request failed due to a timeout', res, obj);
+            },
+            onreadystatechange: function () {
+                log('ajax:', arguments);
             }
         });
     }
+    /**翻译引擎结果集状态判断*/
+    function isAllDone(idsType) {
+        var rst = false;
+        idsType.forEach(function (id, i) {
+            if (i == 0)
+                rst = true;
+            if (!(id in engineResult)) {
+                log('isAllDone(not found):' + id);
+                rst = false;
+                return rst;
+            }
+        });
+        return rst;
+    }
     /**显示内容面板*/
-    function showContent(html) {
+    function showContent(idsType) {
+        log('showContent:', idsType, engineResult);
+        if (!isAllDone(idsType)) {
+            log('showContent return');
+            return;
+        }
+        log('showContent rendering');
         // 发音
-        var audio = document.createElement('tr-audio'),
-            us = document.createElement('a'),
-            uk = document.createElement('a');
-
-        us.innerHTML = '♪US';
-        us.setAttribute('href', 'javascript:void(0)');
-        us.addEventListener('mouseup', playUS);
-        // us.addEventListener('mouseover', playUS);
-        uk.innerHTML = '♪UK';
-        uk.setAttribute('href', 'javascript:void(0)');
-        uk.addEventListener('mouseup', playUK);
-        // uk.addEventListener('mouseover', playUK);
-        audio.appendChild(us);
-        audio.appendChild(uk);
+        audioEngines.push({
+            name: '♪US',
+            url: 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=2'
+        });
+        audioEngines.push({
+            name: '♪UK',
+            url: 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=1'
+        });
+        var audio = document.createElement('tr-audio');
+        audioEngines.forEach(function (obj) {
+            audio.appendChild(getPlayButton(obj));
+        });
         // 翻译内容
-        content.innerHTML = '<div class="' + engineId + '">' + html + '</div>';
-        if (engineId != 'google') { // 谷歌翻译不显示发音图标
+        content.innerHTML = '';
+        // 比较大小写内容
+        var needDel = {};
+        for (var key in idsExtension.lowerCaseMap) {
+            if (engineResult[key] &&
+                engineResult[idsExtension.lowerCaseMap[key]] &&
+                engineResult[key].innerHTML == engineResult[idsExtension.lowerCaseMap[key]].innerHTML) {
+                needDel[key] = key;
+            }
+        }
+        idsType.forEach(function (id) {
+            if (!(id in needDel)) {
+                if (idsExtension.names[id]) {
+                    var title = document.createElement('div');
+                    title.innerHTML = idsExtension.names[id];
+                    title.setAttribute('class', 'list-title');
+                    content.appendChild(title);
+                }
+                content.appendChild(engineResult[id]);
+            }
+        });
+        if (engineId != 'icon-google') { // 谷歌翻译不显示发音图标
             content.insertBefore(audio, content.childNodes[0]);
         }
         content.style.display = 'block';
+        content.scrollTop = 0;
+        content.scrollLeft = 0;
     }
     /**隐藏翻译引擎指示器*/
     function engineActivateHide() {
@@ -524,14 +838,23 @@
         engineActivateHide();
         icon.querySelector('img[icon-id="' + engineId + '"').setAttribute('activate', 'activate');
     }
-    /**美式发音*/
-    function playUS() {
+    /**隐藏 icon*/
+    function hideIcon() {
+        icon.style.display = 'none';
+        content.style.display = 'none';
+        engineId = '';
+        audioEngines = [];
+        engineResult = {};
+        engineActivateHide();
+        forceStopDrag();
+    }
+    /**发音*/
+    function play(obj) {
         if (isDrag()) { // 拖动时候不触发发音
             return;
         }
-        var url = 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=2';
         var audio = new Audio();
-        ajax(url, function (rst, res) {
+        ajax(obj.url, function (rst, res) {
             audio.src = URL.createObjectURL(res.response);
             audio.play();
         }, function (rst) {
@@ -540,28 +863,22 @@
             responseType: 'blob'
         });
     }
-    /**英式发音*/
-    function playUK() {
-        if (isDrag()) { // 拖动时候不触发发音
-            return;
-        }
-        var url = 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=1';
-        var audio = new Audio();
-        ajax(url, function (rst, res) {
-            audio.src = URL.createObjectURL(res.response);
-            audio.play();
-        }, function (rst) {
-            log(rst);
-        }, {
-            responseType: 'blob'
+    /**得到发音按钮*/
+    function getPlayButton(obj) {
+        var type = document.createElement('a');
+        type.innerHTML = obj.name;
+        type.setAttribute('href', 'javascript:void(0)');
+        type.setAttribute('class', 'audio-button');
+        type.addEventListener('mouseup', function () {
+            play(obj);
         });
+        return type;
     }
     /**有道词典排版*/
     function parseYoudao(rst) {
+        var html = '';
         try {
-            // if (true) return xmlToHtml(objToXml(JSON.parse(rst)), 'span');
             var rstJson = JSON.parse(rst),
-                html = '',
                 phoneStyle = 'color:#777;';
             if (rstJson.ec) {
                 var word = rstJson.ec.word[0],
@@ -606,14 +923,18 @@
             if (rstJson.fanyi && rstJson.fanyi.tran) {
                 html += rstJson.fanyi.tran;
             }
-            return html;
         } catch (error) {
             log(error);
-            return error;
+            html += error;
         }
+        var dom = document.createElement('div');
+        dom.setAttribute('class', ids.YOUDAO);
+        dom.innerHTML = html;
+        return dom;
     }
     /**金山词霸排版*/
     function parseIciba(rst) {
+        var html = '';
         try {
             rst = rst.replace(/class=\\"icIBahyI-prons\\"/g, '__mystyle__') // 音标
                 .replace(/\\"/g, '"') // 引号
@@ -630,20 +951,105 @@
                 // 音标
                 .replace(/__mystyle__/g, ' style="color:#777;"');
             var match = /dict.innerHTML='(.*)?';/g.exec(rst);
-            return match[1];
+            html += match[1];
+            if (html.indexOf('去爱词霸官网翻译') != -1)
+                html = '';
         } catch (error) {
             log(error);
-            return error;
+            html += error;
         }
+        var dom = document.createElement('div');
+        dom.setAttribute('class', ids.ICIBA);
+        dom.innerHTML = html;
+        return dom;
+    }
+    /**沪江小D排版*/
+    function parseHjenglish(rst) {
+        var dom = document.createElement('div');
+        dom.setAttribute('class', ids.HJENGLISH);
+        try {
+            var doc = htmlToDom(cleanHtml(rst));
+            var entry = doc.querySelector('.word-text h2');
+            var pronounces = doc.querySelector('.pronounces');
+            var collins = doc.querySelector('div[data-id="detail"] .word-details-item-content .detail-groups');
+            if (entry) {
+                var entryDom = document.createElement('div');
+                entryDom.setAttribute('class', 'entry');
+                entryDom.innerHTML = entry.innerHTML;
+                dom.appendChild(entryDom);
+                if (pronounces) {
+                    var pronounceDom = document.createElement('div');
+                    pronounces.querySelectorAll('.pronounces [class="word-audio"]').forEach(function (ele) {
+                        pronounceDom.appendChild(getPlayButton({
+                            name: '♪US',
+                            url: ele.getAttribute('data-src')
+                        }));
+                    });
+                    pronounces.querySelectorAll('.pronounces [class="word-audio word-audio-en"]').forEach(function (ele) {
+                        pronounceDom.appendChild(getPlayButton({
+                            name: '♪UK',
+                            url: ele.getAttribute('data-src')
+                        }));
+                    });
+                    dom.appendChild(pronounceDom);
+                    dom.appendChild(pronounces);
+                }
+                if (collins) {
+                    dom.appendChild(htmlToDom('<div>《权威词典》</div>'));
+                    dom.appendChild(collins);
+                }
+            }
+        } catch (error) {
+            log(error);
+            dom.appendChild(htmlToDom(error));
+        }
+        return dom;
+    }
+    /**必应词典排版*/
+    function parseBing(rst) {
+        var html = '';
+        try {
+            rst = cleanHtml(rst).replace(/(?:a>)/ig, 'span>')
+                .replace(/(?:<a)/ig, '<span');
+            var doc = htmlToDom(rst);
+            doc.querySelectorAll('.hw_ti').forEach(function (ele) { // 牛津词头（不准）
+                ele.remove();
+            });
+            var entry = doc.querySelector('.qdef .hd_area');
+            var concise = doc.querySelector('.qdef ul');
+            var tense = doc.querySelector('.qdef .hd_div1');
+            var oald = doc.querySelector('#authid');
+            if (entry) {
+                html += '<div class="entry">' + entry.innerHTML + '</div>';
+                if (concise)
+                    html += '<div class="concise">' + concise.outerHTML + '</div>';
+                if (tense)
+                    html += '<div class="tense">' + tense.outerHTML + '</div>';
+                if (oald)
+                    html += '<div class="oald">《牛津高阶英汉双解词典第八版》<br>' + oald.outerHTML + '</div>';
+            }
+        } catch (error) {
+            log(error);
+            html += error;
+        }
+        var dom = document.createElement('div');
+        dom.setAttribute('class', ids.BING);
+        dom.innerHTML = html;
+        return dom;
     }
     /**谷歌翻译排版*/
     function parseGoogle(rst) {
+        var dom = document.createElement('div');
+        dom.setAttribute('class', ids.GOOGLE);
         try {
-            return xmlToHtml(objToXml(JSON.parse(rst)), 'span');
+            // 发音
+            // 内容
+            dom.appendChild(htmlToDom(xmlToHtml(objToXml(JSON.parse(rst)), 'span')));
         } catch (error) {
             log(error);
-            return error;
+            dom.appendChild(htmlToDom(error));
         }
+        return dom;
     }
     /**
      * 谷歌翻译 token 计算
