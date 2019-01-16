@@ -461,7 +461,7 @@
     });
     /**日志输出*/
     function log() {
-        var debug = true;
+        var debug = false;
         if (!debug)
             return;
         if (arguments) {
