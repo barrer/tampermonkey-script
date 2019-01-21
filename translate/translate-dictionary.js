@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      1.7
+// @version      1.8
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -109,9 +109,12 @@
     
     tr-content {
         display: block;
-        max-width: 400px;
+        max-width: 300px;
         max-height: 200px;
-        overflow: auto;
+        width: 300px;
+        height: 200px;
+        overflow-x: auto;
+        overflow-y: scroll;
         background: white;
         padding: 2px 8px;
         margin-top: 5px;
@@ -416,7 +419,7 @@
             obj[ids.BING] = '《Bing 词典》';
             obj[ids.BING_LOWER_CASE] = '';
             obj[ids.HJENGLISH] = '《沪江小D》';
-            obj[ids.GOOGLE] = '';
+            obj[ids.GOOGLE] = '《谷歌翻译》';
             return obj;
         })()
     }
@@ -519,6 +522,8 @@
             if (!isDrag()) { // 没有拖动鼠标抬起的时候触发点击事件
                 if (engineId == obj.id)
                     return; // 已经是当前翻译引擎
+                else
+                    cleanContent(); // 清空之前翻译结果
                 engineId = obj.id; // 翻译引擎 ID
                 engineActivateShow(); // 显示翻译引擎指示器
                 audioEngines = []; // 清空发音引擎
@@ -780,12 +785,12 @@
     /**显示内容面板*/
     function showContent(idsType) {
         log('showContent:', idsType, engineResult);
-        if (!isAllDone(idsType)) {
-            log('showContent return');
-            return;
+        if (isAllDone(idsType)) {
+            log('showContent allDone');
         }
         log('showContent rendering');
         // 发音
+        audioEngines = []; // 清空防止多次渲染
         audioEngines.push({
             name: '♪US',
             url: 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=2'
@@ -810,7 +815,7 @@
             }
         }
         idsType.forEach(function (id) {
-            if (!(id in needDel)) {
+            if (engineResult[id] && !(id in needDel)) {
                 if (idsExtension.names[id]) {
                     var title = document.createElement('div');
                     title.innerHTML = idsExtension.names[id];
@@ -823,6 +828,9 @@
         if (engineId != 'icon-google') { // 谷歌翻译不显示发音图标
             content.insertBefore(audio, content.childNodes[0]);
         }
+        var largeHeight = document.createElement('div'); // 防止滚动条闪来闪去
+        largeHeight.style.height = '10000px';
+        content.appendChild(largeHeight);
         content.style.display = 'block';
         content.scrollTop = 0;
         content.scrollLeft = 0;
@@ -847,6 +855,13 @@
         engineResult = {};
         engineActivateHide();
         forceStopDrag();
+    }
+    /**清空翻译面板*/
+    function cleanContent() {
+        content.innerHTML = '';
+        var largeHeight = document.createElement('div'); // 防止滚动条闪来闪去
+        largeHeight.style.height = '10000px';
+        content.appendChild(largeHeight);
     }
     /**发音*/
     function play(obj) {
