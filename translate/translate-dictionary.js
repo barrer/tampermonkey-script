@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      1.9
+// @version      2.0
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -373,12 +373,11 @@
         display: inline;
     }
     `;
-    var link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.type = 'text/css';
-    link.href = URL.createObjectURL(new Blob(['\ufeff', style.textContent], {
-        type: 'text/css;charset=UTF-8'
-    }));
+    // iframe 工具库
+    var iframe = document.createElement('iframe');
+    var iframeWin = null;
+    var iframeDoc = null;
+    iframe.style.display = 'none';
     // 翻译图标、内容面板、翻译内容列表、当前选中文本、当前翻译引擎、当前翻译面板内容列表数组
     var icon = document.createElement('tr-icon'),
         content = document.createElement('tr-content'),
@@ -551,6 +550,17 @@
     var shadow = root.attachShadow({
         mode: 'open'
     });
+    // iframe 工具库加入 Shadow
+    shadow.appendChild(iframe);
+    iframeWin = iframe.contentWindow;
+    iframeDoc = iframe.contentDocument;
+    // 外部样式表
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = createObjectURLWithTry(new Blob(['\ufeff', style.textContent], {
+        type: 'text/css;charset=UTF-8'
+    }));
     // 多种方式最大化兼容：Content Security Policy
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
     shadow.appendChild(style); // 内部样式表
@@ -699,25 +709,25 @@
     function objToXml(obj) {
         var xml = '';
         for (var prop in obj) {
-            if (typeof obj[prop] === 'function') {
+            if (obj[prop] instanceof iframeWin.Function) {
                 continue;
             }
-            xml += obj[prop] instanceof Array ? '' : '<' + prop + '>';
-            if (obj[prop] instanceof Array) {
+            xml += obj[prop] instanceof iframeWin.Array ? '' : '<' + prop + '>';
+            if (obj[prop] instanceof iframeWin.Array) {
                 for (var array in obj[prop]) {
-                    if (typeof obj[prop][array] === 'function') {
+                    if (obj[prop][array] instanceof iframeWin.Function) {
                         continue;
                     }
                     xml += '<' + prop + '>';
-                    xml += objToXml(new Object(obj[prop][array]));
+                    xml += objToXml(new iframeWin.Object(obj[prop][array]));
                     xml += '</' + prop + '>';
                 }
-            } else if (typeof obj[prop] == 'object') {
-                xml += objToXml(new Object(obj[prop]));
+            } else if (obj[prop] instanceof iframeWin.Object) {
+                xml += objToXml(new iframeWin.Object(obj[prop]));
             } else {
                 xml += obj[prop];
             }
-            xml += obj[prop] instanceof Array ? '' : '</' + prop + '>';
+            xml += obj[prop] instanceof iframeWin.Array ? '' : '</' + prop + '>';
         }
         var xml = xml.replace(/<\/?[0-9]{1,}>/g, '');
         return xml
@@ -740,6 +750,15 @@
             .replace(/<style[\s\S]*?<\/style>/ig, '')
             .replace(/<img[\s\S]*?>/ig, '')
             .replace(/on[a-z]*=".*?"/ig, '');
+    }
+    /**带异常处理的 createObjectURL*/
+    function createObjectURLWithTry(blob) {
+        try {
+            return iframeWin.URL.createObjectURL(blob);
+        } catch (error) {
+            log(error);
+        }
+        return '';
     }
     /**ajax 跨域访问公共方法*/
     function ajax(url, success, error, obj) {
@@ -865,9 +884,9 @@
         if (isDrag()) { // 拖动时候不触发发音
             return;
         }
-        var audio = new Audio();
+        var audio = new iframeWin.Audio();
         ajax(obj.url, function (rst, res) {
-            audio.src = URL.createObjectURL(res.response);
+            audio.src = createObjectURLWithTry(res.response);
             audio.play();
         }, function (rst) {
             log(rst);
@@ -890,7 +909,7 @@
     function parseYoudao(rst) {
         var html = '';
         try {
-            var rstJson = JSON.parse(rst),
+            var rstJson = iframeWin.JSON.parse(rst),
                 phoneStyle = 'color:#777;';
             if (rstJson.ec) {
                 var word = rstJson.ec.word[0],
@@ -1065,7 +1084,7 @@
         try {
             // 发音
             // 内容
-            dom.appendChild(htmlToDom(xmlToHtml(objToXml(JSON.parse(rst)), 'span')));
+            dom.appendChild(htmlToDom(xmlToHtml(objToXml(iframeWin.JSON.parse(rst)), 'span')));
         } catch (error) {
             log(error);
             dom.appendChild(htmlToDom(error));

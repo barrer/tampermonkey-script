@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      4.1
+// @version      4.2
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、汉典、PDF 划词翻译”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -89,12 +89,11 @@
         margin-right: 4px;
     }
     `;
-    var link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.type = 'text/css';
-    link.href = URL.createObjectURL(new Blob(['\ufeff', style.textContent], {
-        type: 'text/css;charset=UTF-8'
-    }));
+    // iframe 工具库
+    var iframe = document.createElement('iframe');
+    var iframeWin = null;
+    var iframeDoc = null;
+    iframe.style.display = 'none';
     var gm = {
         TEXT: 'barrer.translate.data.transfer.text',
         REDIRECT_URL: 'barrer.translate.data.transfer.redirect_url',
@@ -396,6 +395,17 @@
     var shadow = root.attachShadow({
         mode: 'open'
     });
+    // iframe 工具库加入 Shadow
+    shadow.appendChild(iframe);
+    iframeWin = iframe.contentWindow;
+    iframeDoc = iframe.contentDocument;
+    // 外部样式表
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = createObjectURLWithTry(new Blob(['\ufeff', style.textContent], {
+        type: 'text/css;charset=UTF-8'
+    }));
     shadow.appendChild(style); // 内部样式表
     shadow.appendChild(link); // 外部样式表
     shadow.appendChild(icon); // 翻译图标加入 Shadow
@@ -502,6 +512,15 @@
         arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
         return arr;
     };
+    /**带异常处理的 createObjectURL*/
+    function createObjectURLWithTry(blob) {
+        try {
+            return iframeWin.URL.createObjectURL(blob);
+        } catch (error) {
+            log(error);
+        }
+        return '';
+    }
     /**Esc键关闭窗口*/
     function escExit(e) {
         e = e || window.event;
