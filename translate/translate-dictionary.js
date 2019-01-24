@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      2.0
+// @version      2.1
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -14,7 +14,7 @@
 // @connect      hjenglish.com
 // @connect      hjapi.com
 // @connect      hjfile.cn
-// @connect      cn.bing.com
+// @connect      bing.com
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
@@ -455,7 +455,7 @@
                 engineResult[ids.YOUDAO] = htmlToDom('error: 无法连接翻译服务');
                 showContent();
             });
-            ajax('https://cn.bing.com/dict/search?q=' + encodeURIComponent(text), function (rst) {
+            ajax('https://www4.bing.com/dict/search?q=' + encodeURIComponent(text), function (rst) {
                 engineResult[ids.BING] = parseBing(rst);
                 showContent();
             }, function (rst) {
@@ -488,7 +488,7 @@
                     engineResult[ids.YOUDAO_LOWER_CASE] = htmlToDom('error: 无法连接翻译服务');
                     showContent();
                 });
-                ajax('https://cn.bing.com/dict/search?q=' + encodeURIComponent(text.toLowerCase()), function (rst) {
+                ajax('https://www4.bing.com/dict/search?q=' + encodeURIComponent(text.toLowerCase()), function (rst) {
                     engineResult[ids.BING_LOWER_CASE] = parseBing(rst);
                     showContent();
                 }, function (rst) {
@@ -506,9 +506,9 @@
             var url = 'https://translate.google.cn/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&hl=zh-CN&sl=auto';
             url += '&tk=' + token(text);
             if (hasChineseByRange(text))
-                url += '&tl=en&q=' + text;
+                url += '&tl=en&q=' + encodeURIComponent(text);
             else
-                url += '&tl=zh-CN&q=' + text;
+                url += '&tl=zh-CN&q=' + encodeURIComponent(text);
             ajax(url, function (rst) {
                 engineResult[ids.GOOGLE] = parseGoogle(rst);
                 showContent();
