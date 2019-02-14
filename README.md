@@ -18,7 +18,7 @@
 ![translate-dictionary.jpg](translate/translate-dictionary.jpg)
 
 特色：  
-* 划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、沪江小D、谷歌翻译”
+* 划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 * 支持发音
 * 支持显示当前翻译引擎
 * 支持面板拖动
@@ -55,4 +55,4 @@ Tampermonkey 是一款免费的浏览器扩展和最为流行的用户脚本管�
 脚本名 | 用途
 -|-
 translate.js|划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、汉典、PDF 划词翻译”网页翻译
-translate-dictionary.js|划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、沪江小D、谷歌翻译”
+translate-dictionary.js|划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
