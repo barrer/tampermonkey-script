@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      4.3
+// @version      4.4
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、汉典、PDF 划词翻译”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -379,14 +379,16 @@
         img.setAttribute('title', obj.name);
         img.addEventListener('mouseup', function () {
             if (iconDrag.elementOriginalLeft == myParseInt(icon.style.left) &&
-                iconDrag.elementOriginalTop == myParseInt(icon.style.top)) // 没有拖动鼠标抬起的时候触发点击事件
+                iconDrag.elementOriginalTop == myParseInt(icon.style.top)) { // 没有拖动鼠标抬起的时候触发点击事件
                 dataTransfer.beforePopup(obj.popup);
+            }
         });
         if (isIconImgMore) {
             img.setAttribute('is-more', 'true');
         }
-        if (obj.id == 'more')
+        if (obj.id == 'more') {
             isIconImgMore = true;
+        }
         icon.appendChild(img);
     });
     // 翻译图标添加到 DOM
@@ -465,10 +467,11 @@
             var isMore = gm.get(gm.MORE, false);
             log('isMore: ' + isMore);
             icon.querySelectorAll('img[is-more]').forEach(function (ele) {
-                if (isMore)
+                if (isMore) {
                     ele.style.display = 'inline-block';
-                else
+                } else {
                     ele.style.display = 'none';
+                }
             });
             // 兼容部分 Content Security Policy
             icon.style.position = 'absolute';
@@ -482,8 +485,9 @@
     /**日志输出*/
     function log() {
         var debug = false;
-        if (!debug)
+        if (!debug) {
             return;
+        }
         if (arguments) {
             for (var i = 0; i < arguments.length; i++) {
                 console.log(arguments[i]);
@@ -501,8 +505,9 @@
     }
     /**数组移动*/
     function arrayMove(arr, oldIndex, newIndex) {
-        if (oldIndex < 0 || oldIndex >= arr.length || newIndex < 0 || newIndex >= arr.length)
+        if (oldIndex < 0 || oldIndex >= arr.length || newIndex < 0 || newIndex >= arr.length) {
             return arr;
+        }
         if (newIndex >= arr.length) {
             var k = newIndex - arr.length + 1;
             while (k--) {
@@ -525,12 +530,14 @@
     function escExit(e) {
         e = e || window.event;
         var isEscape = false;
-        if ("key" in e)
+        if ("key" in e) {
             isEscape = (e.key == "Escape" || e.key == "Esc");
-        else
+        } else {
             isEscape = (e.keyCode == 27);
-        if (isEscape)
+        }
+        if (isEscape) {
             window.close();
+        }
     }
     /**触发事件*/
     function tiggerEvent(el, type) {
@@ -605,8 +612,9 @@
         };
         this.dragElement = function (e) {
             log('dragging');
-            if (!ref.dragging)
+            if (!ref.dragging) {
                 return;
+            }
             e.preventDefault();
             // move element
             element.style.left = ref.elementOriginalLeft + (e.clientX - ref.mouseDownPositionX) + 'px';
@@ -701,8 +709,9 @@
             show.setAttribute('href', 'javascript:void(0)');
             show.addEventListener('click', function () {
                 if (this.innerHTML == 'show') { // 隐藏
-                    if (this.getAttribute('show-id') != 'settings')
+                    if (this.getAttribute('show-id') != 'settings') {
                         hideConfig[this.getAttribute('show-id')] = true;
+                    }
                 } else { // 显示
                     delete hideConfig[this.getAttribute('show-id')];
                 }
@@ -729,10 +738,11 @@
         var tempArray = [];
         // hide
         iconArray.forEach(function (obj) {
-            if (hide && !isNotNull(hideConfig[obj.id]))
+            if (hide && !isNotNull(hideConfig[obj.id])) {
                 tempArray.push(obj);
-            else if (!hide)
+            } else if (!hide) {
                 tempArray.push(obj);
+            }
         });
         // sort
         var sorted = {};
