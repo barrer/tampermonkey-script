@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      2.2
+// @version      2.3
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -292,6 +292,14 @@
         list-style: none;
     }
     
+    .hjenglish dd {
+        margin-left: 1em;
+    }
+    
+    .hjenglish dd>p {
+        margin-left: 2.5em;
+    }
+    
     .bing h1,
     .bing strong {
         font-size: 1em;
@@ -376,6 +384,11 @@
         display: inline;
     }
     
+    .bing .idm_seg,
+    .bing .li_ids_co {
+        margin-left: 1em;
+    }
+    
     .cambridge .entry~.entry {
         margin-top: 1em;
     }
@@ -409,6 +422,7 @@
         border: 1px solid #777;
         border-radius: .5em;
         padding: 0 2px;
+        font-size: .8em;
     }
     
     .cambridge .examp,
@@ -422,15 +436,9 @@
     .cambridge .entry-body__el+.entry-body__el {
         margin-top: 1em;
     }
-
-    .cambridge .pos::before {
-        content: "[";
-        padding-right: 3px;
-    }
     
-    .cambridge .pos::after {
-        content: "]";
-        padding-left: 3px;
+    .cambridge .pos-body {
+        margin-left: 1em;
     }
     `;
     // iframe 工具库
@@ -467,8 +475,8 @@
         CAMBRIDGE: 'cambridge'
     };
     var idsExtension = {
-        LIST_DICT: [ids.BING, ids.CAMBRIDGE, ids.HJENGLISH, ids.ICIBA, ids.YOUDAO],
-        LIST_DICT_LOWER_CASE: [ids.BING, ids.BING_LOWER_CASE, ids.CAMBRIDGE, ids.HJENGLISH, ids.ICIBA, ids.ICIBA_LOWER_CASE, ids.YOUDAO, ids.YOUDAO_LOWER_CASE],
+        LIST_DICT: [ids.BING, ids.HJENGLISH, ids.CAMBRIDGE, ids.ICIBA, ids.YOUDAO],
+        LIST_DICT_LOWER_CASE: [ids.BING, ids.BING_LOWER_CASE, ids.HJENGLISH, ids.CAMBRIDGE, ids.ICIBA, ids.ICIBA_LOWER_CASE, ids.YOUDAO, ids.YOUDAO_LOWER_CASE],
         LIST_GOOGLE: [ids.GOOGLE],
         lowerCaseMap: (function () {
             var obj = {};
@@ -1154,6 +1162,7 @@
         dom.setAttribute('class', ids.HJENGLISH);
         try {
             var doc = htmlToDom(cleanHtml(rst));
+            var label = doc.querySelector('.word-details-item-content header');
             var entry = doc.querySelector('.word-text h2');
             var collins = doc.querySelector('div[data-id="detail"] .word-details-item-content .detail-groups');
             if (entry) {
@@ -1162,7 +1171,13 @@
                 entryDom.innerHTML = entry.innerHTML;
                 dom.appendChild(entryDom);
                 if (collins) {
-                    dom.appendChild(htmlToDom('<div>《权威词典》</div>'));
+                    if (label) {
+                        var regex = /(《.*?》)/ig;
+                        var match = regex.exec(label.innerHTML);
+                        if (match && match[1]) {
+                            dom.appendChild(htmlToDom('<div>' + match[1] + '</div>'));
+                        }
+                    }
                     dom.appendChild(collins);
                 }
             }
