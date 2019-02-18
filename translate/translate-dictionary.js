@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      2.6
+// @version      2.7
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -151,6 +151,13 @@
     .list-title {
         color: #00c;
         display: inline-block;
+        text-decoration: none;
+        cursor: inherit;
+    }
+    
+    .list-title:hover {
+        text-decoration: none;
+        cursor: inherit;
     }
     
     .google .sentences,
