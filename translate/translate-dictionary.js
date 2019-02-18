@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      2.5
+// @version      2.6
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -562,7 +562,7 @@
                 });
             };
             obj[ids.BING] = function (text, time) {
-                ajax('https://www4.bing.com/dict/search?q=' + encodeURIComponent(text), function (rst) {
+                ajax('https://cn.bing.com/dict/search?q=' + encodeURIComponent(text), function (rst) {
                     putEngineResult(ids.BING, parseBing(rst), time);
                     showContent();
                 }, function (rst) {
@@ -571,7 +571,7 @@
                 });
             };
             obj[ids.BING_LOWER_CASE] = function (text, time) {
-                ajax('https://www4.bing.com/dict/search?q=' + encodeURIComponent(text.toLowerCase()), function (rst) {
+                ajax('https://cn.bing.com/dict/search?q=' + encodeURIComponent(text.toLowerCase()), function (rst) {
                     putEngineResult(ids.BING_LOWER_CASE, parseBing(rst), time);
                     showContent();
                 }, function (rst) {
