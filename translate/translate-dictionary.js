@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      2.9
+// @version      3.0
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -812,7 +812,7 @@
                 .replace(/(?:a>)/ig, 'span>')
                 .replace(/(?:<a)/ig, '<span')
                 .replace(/style=".*?"/ig, '')
-                .replace(/<span class="prop">释义<\/span>/ig, '<span class="prop">[释义]<\/span>')
+                .replace(/<span class="prop">释义<\/span>/ig, '<span class="prop">释义：<\/span>')
                 .replace(/<h1 class="base-word abbr chinese change-base">变形<\/h1>/ig, '');
             var doc = htmlToDom(rst);
             // 发音
