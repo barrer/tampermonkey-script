@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      2.8
+// @version      2.9
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -25,433 +25,95 @@
     /**样式*/
     var style = document.createElement('style');
     style.textContent = `
-    * {
-        word-wrap: break-word !important
-    }
-    
-    a {
-        color: #36f;
-        text-decoration: none;
-        cursor: pointer;
-    }
-    
-    a:hover {
-        text-decoration: underline;
-    }
-    
-    img {
-        cursor: pointer;
-        display: inline-block;
-        width: 22px;
-        height: 22px;
-        border: 1px solid #dfe1e5;
-        border-radius: 22px;
-        background-color: rgba(255, 255, 255, 1);
-        padding: 2px;
-        margin: 0;
-        margin-right: 5px;
-        box-sizing: content-box;
-        vertical-align: middle;
-    }
-    
-    img:last-of-type {
-        margin-right: auto;
-    }
-    
-    img:hover {
-        border: 1px solid #c6c6c6;
-        -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    
-    img[activate] {
-        border: 1px solid transparent;
-        -webkit-box-shadow: 0px 0px 0px 1px #f90;
-        box-shadow: 0px 0px 0px 1px #f90;
-    }
-    
-    tr-icon {
-        display: none;
-        position: absolute;
-        padding: 2px;
-        margin: 0;
-        cursor: move;
-        box-sizing: content-box;
-        font-size: 13px;
-        text-align: left;
-        border: 0;
-        color: black;
-        z-index: 2147483647;
-        background: #fff;
-        border-radius: 2px;
-        -webkit-box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
-        box-shadow: 0 3px 8px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.08);
-    }
-    
-    tr-audio {
-        display: block;
-        margin-bottom: 5px;
-    }
-    
-    tr-audio a {
-        color: #36f;
-        text-decoration: none;
-        cursor: pointer;
-        margin-right: 10px;
-    }
-    
-    tr-audio a:last-of-type {
-        margin-right: auto;
-    }
-    
-    tr-audio a:hover {
-        text-decoration: underline;
-    }
-    
-    tr-content {
-        display: block;
-        max-width: 300px;
-        max-height: 200px;
-        width: 300px;
-        height: 200px;
-        overflow-x: auto;
-        overflow-y: scroll;
-        background: white;
-        padding: 2px 8px;
-        margin-top: 5px;
-        box-sizing: content-box;
-        font-family: "Helvetica Neue", "Helvetica", "Arial", "sans-serif";
-        font-size: 14px;
-        line-height: 18px;
-    }
-    
-    a.audio-button {
-        color: #36f;
-        text-decoration: none;
-        cursor: pointer;
-        margin-right: 10px;
-    }
-    
-    a.audio-button:last-of-type {
-        margin-right: auto;
-    }
-    
-    a.audio-button:hover {
-        text-decoration: underline;
-    }
-    
-    .br {
-        border-top: 1px dashed #777;
-        margin: .5em auto .3em auto;
-    }
-    
-    .list-title~.list-title {
-        margin-top: 1em;
-    }
-    
-    .list-title {
-        color: #00c;
-        display: inline-block;
-        text-decoration: none;
-        cursor: inherit;
-    }
-    
-    .list-title:hover {
-        text-decoration: none;
-        cursor: inherit;
-    }
-    
-    .google .sentences,
-    .google .trans,
-    .google .orig,
-    .google .dict,
-    .google .pos,
-    .none {
-        display: block;
-    }
-    
-    .google .backend,
-    .google .entry,
-    .google .base_form,
-    .google .pos_enum,
-    .google .src,
-    .google .confidence,
-    .google .ld_result,
-    .none {
-        display: none;
-    }
-    
-    .google .orig {
-        font-style: italic;
-        color: #777;
-    }
-    
-    .google .pos {
-        margin-top: 1em;
-    }
-    
-    .google .pos:before {
-        content: "[";
-    }
-    
-    .google .pos:after {
-        content: "]";
-    }
-    
-    .google .terms:before {
-        content: "【";
-    }
-    
-    .google .terms:after {
-        content: "】";
-    }
-    
-    .google .terms {
-        margin-right: .2em;
-    }
-    
-    .youdao .phone {
-        color: #777;
-    }
-    
-    .youdao .phone:before {
-        content: "[";
-    }
-    
-    .youdao .phone:after {
-        content: "]";
-    }
-    
-    .youdao .phrs:before {
-        content: "[短语]";
-        display: block;
-    }
-    
-    .youdao .trs>.tr>.exam:before {
-        content: "[例句]";
-        display: block;
-    }
-    
-    .youdao .trs>.tr>.l:before {
-        content: "[释义]";
-        display: block;
-    }
-    
-    .youdao [class="#text"] {
-        font-style: italic;
-    }
-    
-    .youdao .return-phrase,
-    .youdao [class="@action"],
-    .none {
-        display: none;
-    }
-    
-    .hjenglish dl,
-    .hjenglish dt,
-    .hjenglish dd,
-    .hjenglish p,
-    .hjenglish ul,
-    .hjenglish li,
-    .hjenglish h3 {
-        margin: 0;
-        padding: 0;
-        margin-block-start: 0px;
-        margin-block-end: 0px;
-        margin-inline-start: 0px;
-        margin-inline-end: 0px;
-    }
-    
-    .hjenglish h3 {
-        font-size: 1em;
-        font-weight: normal;
-    }
-    
-    .hjenglish .detail-pron,
-    .hjenglish .pronounces {
-        color: #777;
-    }
-    
-    .hjenglish ul {
-        margin-left: 2em;
-    }
-    
-    .hjenglish .def-sentence-from,
-    .hjenglish .def-sentence-to {
-        display: none;
-    }
-    
-    .hjenglish .detail-groups dd h3:before {
-        counter-increment: eq;
-        content: counter(eq) ".";
-        display: block;
-        width: 22px;
-        float: left;
-    }
-    
-    .hjenglish .detail-groups dl {
-        counter-reset: eq;
-        margin-bottom: .5em;
-        clear: both;
-    }
-    
-    .hjenglish ol,
-    .hjenglish ul {
-        list-style: none;
-    }
-    
-    .hjenglish dd {
-        margin-left: 1em;
-    }
-    
-    .hjenglish dd>p {
-        margin-left: 2.5em;
-    }
-    
-    .bing h1,
-    .bing strong {
-        font-size: 1em;
-        font-weight: normal;
-        margin: 0;
-        padding: 0;
-    }
-    
-    .bing .concise ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-    
-    .bing .hd_tf {
-        margin-right: 1em;
-    }
-    
-    .bing .concise .pos {
-        margin-right: .2em;
-    }
-    
-    .bing .concise .web {
-        margin-right: auto;
-    }
-    
-    .bing .concise .web:after {
-        content: "："
-    }
-    
-    .bing .oald {
-        margin-top: .4em;
-    }
-    
-    .bing .hd_tf_lh div {
-        display: inline;
-        color: #777;
-    }
-    
-    .bing #authid td:first-child {
-        width: 22px;
-        margin: 0;
-        padding: 0;
-    }
-    
-    .bing .def_row {
-        vertical-align: top;
-    }
-    
-    .bing .bil_dis,
-    .bing .val_dis {
-        padding-right: .25em;
-    }
-    
-    .bing .li_exs {
-        display: none;
-    }
-    
-    .bing .li_id {
-        border: 0;
-        padding: .2em;
-    }
-    
-    .bing .infor,
-    .bing .sen_com,
-    .bing .com_sep,
-    .bing .bil,
-    .bing .gra {
-        padding-right: .25em;
-    }
-    
-    .bing .infor,
-    .bing .label {
-        padding-left: .25em;
-    }
-    
-    .bing .each_seg+.each_seg {
-        margin-top: .5em;
-    }
-    
-    .bing .de_co div {
-        display: inline;
-    }
-    
-    .bing .idm_seg,
-    .bing .li_ids_co {
-        margin-left: 1em;
-    }
-    
-    .bing .sim {
-        display: inline;
-    }
-    
-    .cambridge .entry~.entry {
-        margin-top: 1em;
-    }
-    
-    .cambridge p,
-    .cambridge h2,
-    .cambridge h3 {
-        padding: 0;
-        margin: 0;
-    }
-    
-    .cambridge h2,
-    .cambridge h3 {
-        font-size: 1em;
-        font-weight: normal;
-    }
-    
-    .cambridge .headword .hw {
-        display: block;
-    }
-    
-    .cambridge .pron {
-        color: #777;
-    }
-    
-    .cambridge b.def {
-        font-weight: normal;
-    }
-    
-    .cambridge .epp-xref {
-        border: 1px solid #777;
-        border-radius: .5em;
-        padding: 0 2px;
-        font-size: .8em;
-    }
-    
-    .cambridge .examp,
-    .cambridge .extraexamps,
-    .cambridge .cols,
-    .cambridge .xref,
-    .cambridge .fcdo {
-        display: none;
-    }
-    
-    .cambridge .entry-body__el+.entry-body__el {
-        margin-top: 1em;
-    }
-    
-    .cambridge .pos-body {
-        margin-left: 1em;
-    }
+    /*组件样式*/
+    *{word-wrap:break-word!important}
+    a{color:#36f;text-decoration:none;cursor:pointer}
+    a:hover{text-decoration:underline}
+    img{cursor:pointer;display:inline-block;width:22px;height:22px;border:1px solid #dfe1e5;border-radius:22px;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
+    img:last-of-type{margin-right:auto}
+    img:hover{border:1px solid #c6c6c6;-webkit-box-shadow:1px 1px 3px rgba(0,0,0,0.1);box-shadow:1px 1px 3px rgba(0,0,0,0.1)}
+    img[activate]{border:1px solid transparent;-webkit-box-shadow:0 0 0 1px #f90;box-shadow:0 0 0 1px #f90}
+    tr-icon{display:none;position:absolute;padding:2px;margin:0;cursor:move;box-sizing:content-box;font-size:13px;text-align:left;border:0;color:black;z-index:2147483647;background:#fff;border-radius:2px;-webkit-box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 1px rgba(0,0,0,0.08);box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 1px rgba(0,0,0,0.08)}
+    tr-audio{display:block;margin-bottom:5px}
+    tr-audio a{color:#36f;text-decoration:none;cursor:pointer;margin-right:10px}
+    tr-audio a:last-of-type{margin-right:auto}
+    tr-audio a:hover{text-decoration:underline}
+    tr-content{display:block;max-width:300px;max-height:200px;width:300px;height:200px;overflow-x:auto;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:14px;line-height:18px}
+    a.audio-button{color:#36f;text-decoration:none;cursor:pointer;margin-right:10px}
+    a.audio-button:last-of-type{margin-right:auto}
+    a.audio-button:hover{text-decoration:underline}
+    .br{border-top:1px dashed #777;margin:.5em auto .3em auto}
+    .list-title~.list-title{margin-top:1em}
+    .list-title{color:#00c;display:inline-block;text-decoration:none;cursor:inherit}
+    .list-title:hover{text-decoration:none;cursor:inherit}
+    /*各引擎样式*/
+    .google .sentences,.google .trans,.google .orig,.google .dict,.google .pos,.none{display:block}
+    .google .backend,.google .entry,.google .base_form,.google .pos_enum,.google .src,.google .confidence,.google .ld_result,.none{display:none}
+    .google .orig{font-style:italic;color:#777}
+    .google .pos{margin-top:1em}
+    .google .pos:before{content:"["}
+    .google .pos:after{content:"]"}
+    .google .terms:before{content:"【"}
+    .google .terms:after{content:"】"}
+    .google .terms{margin-right:.2em}
+    .youdao .pron{margin-right:1em}
+    .youdao .phone{color:#777;margin-right:1em}
+    .youdao .phone:before{content:"["}
+    .youdao .phone:after{content:"]"}
+    .youdao .phrs:before{content:"[短语]";display:block}
+    .youdao .trs>.tr>.exam:before{content:"[例句]";display:block}
+    .youdao .trs>.tr>.l:before{content:"[释义]";display:block}
+    .youdao [class="#text"]{font-style:italic}
+    .youdao .return-phrase,.youdao [class="@action"],.none{display:none}
+    .hjenglish dl,.hjenglish dt,.hjenglish dd,.hjenglish p,.hjenglish ul,.hjenglish li,.hjenglish h3{margin:0;padding:0;margin-block-start:0;margin-block-end:0;margin-inline-start:0;margin-inline-end:0}
+    .hjenglish h3{font-size:1em;font-weight:normal}
+    .hjenglish .detail-pron,.hjenglish .pronounces{color:#777}
+    .hjenglish ul{margin-left:2em}
+    .hjenglish .def-sentence-from,.hjenglish .def-sentence-to{display:none}
+    .hjenglish .detail-groups dd h3:before{counter-increment:eq;content:counter(eq) ".";display:block;width:22px;float:left}
+    .hjenglish .detail-groups dl{counter-reset:eq;margin-bottom:.5em;clear:both}
+    .hjenglish ol,.hjenglish ul{list-style:none}
+    .hjenglish dd{margin-left:1em}
+    .hjenglish dd>p{margin-left:2.5em}
+    .bing h1,.bing strong{font-size:1em;font-weight:normal;margin:0;padding:0}
+    .bing .concise ul{list-style:none;margin:0;padding:0}
+    .bing .hd_tf{margin-right:1em}
+    .bing .concise .pos{margin-right:.2em}
+    .bing .concise .web{margin-right:auto}
+    .bing .concise .web:after{content:"："}
+    .bing .oald{margin-top:.4em}
+    .bing .hd_tf_lh div{display:inline;color:#777}
+    .bing #authid td:first-child{width:22px;margin:0;padding:0}
+    .bing .def_row{vertical-align:top}
+    .bing .bil_dis,.bing .val_dis{padding-right:.25em}
+    .bing .li_exs{display:none}
+    .bing .li_id{border:0;padding:.2em}
+    .bing .infor,.bing .sen_com,.bing .com_sep,.bing .bil,.bing .gra{padding-right:.25em}
+    .bing .infor,.bing .label{padding-left:.25em}
+    .bing .each_seg+.each_seg{margin-top:.5em}
+    .bing .de_co div{display:inline}
+    .bing .idm_seg,.bing .li_ids_co{margin-left:1em}
+    .bing .sim{display:inline}
+    .cambridge .entry~.entry{margin-top:1em}
+    .cambridge p,.cambridge h2,.cambridge h3{padding:0;margin:0}
+    .cambridge h2,.cambridge h3{font-size:1em;font-weight:normal}
+    .cambridge .headword .hw{display:block}
+    .cambridge .pron{color:#777;margin-right:1em}
+    .cambridge b.def{font-weight:normal}
+    .cambridge .epp-xref{border:1px solid #777;border-radius:.5em;padding:0 2px;font-size:.8em}
+    .cambridge .examp,.cambridge .extraexamps,.cambridge .cols,.cambridge .xref,.cambridge .fcdo{display:none}
+    .cambridge .entry-body__el+.entry-body__el{margin-top:1em}
+    .cambridge .pos-body{margin-left:1em}
+    .iciba h1{font-size:1em;font-weight:normal}
+    .iciba ul,.iciba li{list-style:none;margin:0;padding:0}
+    .iciba p,.iciba h1{margin:0;padding:0}
+    .iciba p{display:inline}
+    .iciba .base-speak{color:#777}
+    .iciba .base-speak>span{margin-right:1em}
+    .iciba .base-speak>span:last-of-type{margin-right:auto}
+    .iciba .change{margin-top:.4em}
+    .iciba .change span{margin-right:.5em}
+    .iciba .change span:last-of-type{margin-right:auto}
     `;
     // iframe 工具库
     var iframe = document.createElement('iframe');
@@ -466,10 +128,7 @@
         engineTriggerTime, // 引擎触发时间（milliseconds）
         idsType; // 当前翻译面板内容列表数组
     // 初始化内容面板
-    var largeHeight = document.createElement('div'); // 防止滚动条闪来闪去
-    largeHeight.style.height = '10000px';
     content.appendChild(contentList);
-    content.appendChild(largeHeight);
     // 发音引擎
     var audioEngines = []; // [{name: 'abc', url: 'http://*.mp3', ...}, ...]
     // 翻译引擎结果集
@@ -487,8 +146,8 @@
         CAMBRIDGE: 'cambridge'
     };
     var idsExtension = {
-        LIST_DICT: [ids.BING, ids.HJENGLISH, ids.CAMBRIDGE, ids.ICIBA, ids.YOUDAO],
-        LIST_DICT_LOWER_CASE: [ids.BING, ids.BING_LOWER_CASE, ids.HJENGLISH, ids.CAMBRIDGE, ids.ICIBA, ids.ICIBA_LOWER_CASE, ids.YOUDAO, ids.YOUDAO_LOWER_CASE],
+        LIST_DICT: [ids.ICIBA, ids.YOUDAO, ids.BING, ids.HJENGLISH, ids.CAMBRIDGE],
+        LIST_DICT_LOWER_CASE: [ids.ICIBA, ids.ICIBA_LOWER_CASE, ids.YOUDAO, ids.YOUDAO_LOWER_CASE, ids.BING, ids.BING_LOWER_CASE, ids.HJENGLISH, ids.CAMBRIDGE],
         LIST_GOOGLE: [ids.GOOGLE],
         lowerCaseMap: (function () {
             var obj = {};
@@ -534,7 +193,7 @@
         engines: (function () {
             var obj = {};
             obj[ids.ICIBA] = function (text, time) {
-                ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text), function (rst) {
+                ajax('http://www.iciba.com/' + encodeURIComponent(text), function (rst) {
                     putEngineResult(ids.ICIBA, parseIciba(rst), time);
                     showContent();
                 }, function (rst) {
@@ -543,7 +202,7 @@
                 });
             };
             obj[ids.ICIBA_LOWER_CASE] = function (text, time) {
-                ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text.toLowerCase()), function (rst) {
+                ajax('http://www.iciba.com/' + encodeURIComponent(text.toLowerCase()), function (rst) {
                     putEngineResult(ids.ICIBA_LOWER_CASE, parseIciba(rst), time);
                     showContent();
                 }, function (rst) {
@@ -1105,14 +764,14 @@
                 }
                 html += '<div>';
                 if (ukphone && ukphone.length != 0) {
-                    html += '<span style="' + phoneStyle + '">[英] [' + ukphone + '] </span>';
+                    html += '<span class="pron" style="' + phoneStyle + '">英 [' + ukphone + '] </span>';
                 }
                 if (usphone && usphone.length != 0) {
-                    html += '<span style="' + phoneStyle + '">[美] [' + usphone + '] </span>';
+                    html += '<span class="pron" style="' + phoneStyle + '">美 [' + usphone + '] </span>';
                 }
                 html += '</div>';
                 if (phone && phone.length != 0) {
-                    html += '<div style="' + phoneStyle + '">[' + phone + '] </div>';
+                    html += '<div class="pron" style="' + phoneStyle + '">[' + phone + '] </div>';
                 }
                 trs.forEach(element => {
                     tr += '<div>' + element.tr[0].l.i[0] + '</div>';
@@ -1146,34 +805,36 @@
     }
     /**金山词霸排版*/
     function parseIciba(rst) {
-        var html = '';
-        try {
-            rst = rst.replace(/class=\\"icIBahyI-prons\\"/g, '__mystyle__') // 音标
-                .replace(/\\"/g, '"') // 引号
-                // A标签
-                .replace(/<a([^>]*)?>详细释义<\/a([^>]*)?>/g, '')
-                .replace(/<a([^>]*)?>/g, '')
-                .replace(/<\/a([^>]*)?>/g, '')
-                // 清理属性、标签、多余空格
-                .replace(/(?:class|id|style|xml:lang|lang)=\"([^"]*)\"/g, '')
-                .replace(/(?:label>|strong>)/g, 'span>')
-                .replace(/(?:<label|<strong)/g, '<span')
-                .replace(/(?:p>)/g, 'div>')
-                .replace(/[ ]+/g, ' ')
-                // 音标
-                .replace(/__mystyle__/g, ' style="color:#777;"');
-            var match = /dict.innerHTML='(.*)?';/g.exec(rst);
-            html += match[1];
-            if (html.indexOf('去爱词霸官网翻译') != -1) {
-                html = '';
-            }
-        } catch (error) {
-            log(error);
-            html += error;
-        }
         var dom = document.createElement('div');
         dom.setAttribute('class', ids.ICIBA);
-        dom.innerHTML = html;
+        try {
+            rst = cleanHtml(rst)
+                .replace(/(?:a>)/ig, 'span>')
+                .replace(/(?:<a)/ig, '<span')
+                .replace(/style=".*?"/ig, '')
+                .replace(/<span class="prop">释义<\/span>/ig, '<span class="prop">[释义]<\/span>')
+                .replace(/<h1 class="base-word abbr chinese change-base">变形<\/h1>/ig, '');
+            var doc = htmlToDom(rst);
+            // 发音
+            doc.querySelectorAll('[ms-on-mouseover]').forEach(function (ele) {
+                var str = ele.getAttribute('ms-on-mouseover');
+                var regex = /'(http:\/\/.*?)'/ig;
+                var match = regex.exec(str);
+                if (match && match.length >= 1) {
+                    ele.appendChild(getPlayButton({
+                        name: '♫',
+                        url: match[1]
+                    }));
+                }
+            });
+            // 内容
+            doc.querySelectorAll('.in-base .in-base-top,.in-base .base-list,.in-base .change').forEach(function (ele) {
+                dom.appendChild(ele);
+            });
+        } catch (error) {
+            log(error);
+            dom.appendChild(htmlToDom(error));
+        }
         return dom;
     }
     /**沪江小D排版*/
@@ -1211,8 +872,9 @@
     function parseBing(rst) {
         var html = '';
         try {
-            rst = rst.replace(/onmouseover/ig, 'data-sound');
-            rst = cleanHtml(rst).replace(/(?:a>)/ig, 'span>')
+            rst = rst.replace(/onmouseover/ig, 'data-sound'); // 发音链接预处理
+            rst = cleanHtml(rst)
+                .replace(/(?:a>)/ig, 'span>')
                 .replace(/(?:<a)/ig, '<span');
             var doc = htmlToDom(rst);
             doc.querySelectorAll('.hw_ti').forEach(function (ele) { // 牛津词头（不准）
