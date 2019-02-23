@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      4.4
+// @version      4.5
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、汉典、PDF 划词翻译”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -20,74 +20,13 @@
     /**样式*/
     var style = document.createElement('style');
     style.textContent = `
-    * {
-        word-wrap: break-word !important
-    }
-    
-    img {
-        cursor: pointer;
-        display: inline-block;
-        width: 22px;
-        height: 22px;
-        border: 1px solid #dfe1e5;
-        border-radius: 22px;
-        background-color: rgba(255, 255, 255, 1);
-        padding: 2px;
-        margin: 0;
-        margin-right: 5px;
-        box-sizing: content-box;
-        vertical-align: middle;
-    }
-    
-    img:last-of-type {
-        margin-right: auto;
-    }
-    
-    img:hover {
-        border: 1px solid #c6c6c6;
-        -webkit-box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-        box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    
-    tr-icon {
-        display: none;
-        position: absolute;
-        padding: 0;
-        margin: 0;
-        cursor: move;
-        background: transparent;
-        box-sizing: content-box;
-        font-size: 13px;
-        text-align: left;
-        border: 0;
-        color: black;
-        z-index: 2147473647;
-    }
-    
-    tr-back-forward {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        padding: 0;
-        margin: 0;
-        font-size: 16px;
-        text-align: left;
-        border: 0;
-        cursor: move;
-        background: transparent;
-        z-index: 2147473647;
-    }
-    
-    tr-back-forward a {
-        text-decoration: none;
-        font-size: 16px;
-        cursor: pointer;
-        display: inline;
-        padding: 0;
-        margin: 0;
-        margin-right: 4px;
-    }
+    *{word-wrap:break-word!important}
+    img{cursor:pointer;display:inline-block;width:22px;height:22px;border:1px solid #dfe1e5;border-radius:22px;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
+    img:last-of-type{margin-right:auto}
+    img:hover{border:1px solid #c6c6c6;-webkit-box-shadow:1px 1px 3px rgba(0,0,0,0.1);box-shadow:1px 1px 3px rgba(0,0,0,0.1)}
+    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;background:transparent;box-sizing:content-box;font-size:13px;text-align:left;border:0;color:black;z-index:2147473647}
+    tr-back-forward{display:none;position:fixed;top:0;left:0;padding:0;margin:0;font-size:16px;text-align:left;border:0;cursor:move;background:transparent;z-index:2147473647}
+    tr-back-forward a{text-decoration:none;font-size:16px;cursor:pointer;display:inline;padding:0;margin:0;margin-right:4px}
     `;
     // iframe 工具库
     var iframe = document.createElement('iframe');
@@ -378,10 +317,7 @@
         img.setAttribute('alt', obj.name);
         img.setAttribute('title', obj.name);
         img.addEventListener('mouseup', function () {
-            if (iconDrag.elementOriginalLeft == myParseInt(icon.style.left) &&
-                iconDrag.elementOriginalTop == myParseInt(icon.style.top)) { // 没有拖动鼠标抬起的时候触发点击事件
-                dataTransfer.beforePopup(obj.popup);
-            }
+            dataTransfer.beforePopup(obj.popup);
         });
         if (isIconImgMore) {
             img.setAttribute('is-more', 'true');
