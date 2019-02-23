@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      3.0
+// @version      3.1
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -26,7 +26,7 @@
     var style = document.createElement('style');
     style.textContent = `
     /*组件样式*/
-    *{word-wrap:break-word!important}
+    *{word-wrap:break-word!important;word-break:break-word!important}
     a{color:#36f;text-decoration:none;cursor:pointer}
     a:hover{text-decoration:underline}
     img{cursor:pointer;display:inline-block;width:22px;height:22px;border:1px solid #dfe1e5;border-radius:22px;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
@@ -35,24 +35,19 @@
     img[activate]{border:1px solid transparent;-webkit-box-shadow:0 0 0 1px #f90;box-shadow:0 0 0 1px #f90}
     tr-icon{display:none;position:absolute;padding:2px;margin:0;cursor:move;box-sizing:content-box;font-size:13px;text-align:left;border:0;color:black;z-index:2147483647;background:#fff;border-radius:2px;-webkit-box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 1px rgba(0,0,0,0.08);box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 1px rgba(0,0,0,0.08)}
     tr-audio{display:block;margin-bottom:5px}
-    tr-audio a{color:#36f;text-decoration:none;cursor:pointer;margin-right:10px}
+    tr-audio a{margin-right:1em;font-size:80%}
     tr-audio a:last-of-type{margin-right:auto}
-    tr-audio a:hover{text-decoration:underline}
     tr-content{display:block;max-width:300px;max-height:200px;width:300px;height:200px;overflow-x:auto;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:14px;line-height:18px}
-    a.audio-button{color:#36f;text-decoration:none;cursor:pointer;margin-right:10px}
-    a.audio-button:last-of-type{margin-right:auto}
-    a.audio-button:hover{text-decoration:underline}
-    .br{border-top:1px dashed #777;margin:.5em auto .3em auto}
     .list-title~.list-title{margin-top:1em}
-    .list-title{color:#00c;display:inline-block;text-decoration:none;cursor:inherit}
-    .list-title:hover{text-decoration:none;cursor:inherit}
+    .list-title{color:#00c;display:inline-block}
+    .list-title:hover{text-decoration:none}
     /*各引擎样式*/
     .google .sentences,.google .trans,.google .orig,.google .dict,.google .pos,.none{display:block}
     .google .backend,.google .entry,.google .base_form,.google .pos_enum,.google .src,.google .confidence,.google .ld_result,.none{display:none}
     .google .orig{font-style:italic;color:#777}
     .google .pos{margin-top:1em}
-    .google .pos:before{content:"["}
-    .google .pos:after{content:"]"}
+    .google .pos:before{content:"<"}
+    .google .pos:after{content:">"}
     .google .terms:before{content:"【"}
     .google .terms:after{content:"】"}
     .google .terms{margin-right:.2em}
@@ -60,9 +55,11 @@
     .youdao .phone{color:#777;margin-right:1em}
     .youdao .phone:before{content:"["}
     .youdao .phone:after{content:"]"}
-    .youdao .phrs:before{content:"[短语]";display:block}
-    .youdao .trs>.tr>.exam:before{content:"[例句]";display:block}
-    .youdao .trs>.tr>.l:before{content:"[释义]";display:block}
+    .youdao .pos:before{content:"<"}
+    .youdao .pos:after{content:">"}
+    .youdao .phrs{display:none}
+    .youdao .trs>.tr>.exam{display:none}
+    .youdao .trs>.tr>.l{display:block;margin-left:1em}
     .youdao [class="#text"]{font-style:italic}
     .youdao .return-phrase,.youdao [class="@action"],.none{display:none}
     .hjenglish dl,.hjenglish dt,.hjenglish dd,.hjenglish p,.hjenglish ul,.hjenglish li,.hjenglish h3{margin:0;padding:0;margin-block-start:0;margin-block-end:0;margin-inline-start:0;margin-inline-end:0}
@@ -100,20 +97,15 @@
     .cambridge .headword .hw{display:block}
     .cambridge .pron{color:#777;margin-right:1em}
     .cambridge b.def{font-weight:normal}
-    .cambridge .epp-xref{border:1px solid #777;border-radius:.5em;padding:0 2px;font-size:.8em}
+    .cambridge .epp-xref{border:1px solid #777;border-radius:.5em;padding:0 2px;font-size:80%}
     .cambridge .examp,.cambridge .extraexamps,.cambridge .cols,.cambridge .xref,.cambridge .fcdo{display:none}
     .cambridge .entry-body__el+.entry-body__el{margin-top:1em}
     .cambridge .pos-body{margin-left:1em}
-    .iciba h1{font-size:1em;font-weight:normal}
-    .iciba ul,.iciba li{list-style:none;margin:0;padding:0}
-    .iciba p,.iciba h1{margin:0;padding:0}
-    .iciba p{display:inline}
-    .iciba .base-speak{color:#777}
-    .iciba .base-speak>span{margin-right:1em}
-    .iciba .base-speak>span:last-of-type{margin-right:auto}
-    .iciba .change{margin-top:.4em}
-    .iciba .change span{margin-right:.5em}
-    .iciba .change span:last-of-type{margin-right:auto}
+    .iciba strong{font-size:1em;font-weight:normal}
+    .iciba p{padding:0;margin:0}
+    .iciba .icIBahyI-footer{display:none}
+    .iciba .icIBahyI-prons{color:#777}
+    .iciba .icIBahyI-eg{margin-right:1em}
     `;
     // iframe 工具库
     var iframe = document.createElement('iframe');
@@ -193,7 +185,7 @@
         engines: (function () {
             var obj = {};
             obj[ids.ICIBA] = function (text, time) {
-                ajax('http://www.iciba.com/' + encodeURIComponent(text), function (rst) {
+                ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text), function (rst) {
                     putEngineResult(ids.ICIBA, parseIciba(rst), time);
                     showContent();
                 }, function (rst) {
@@ -202,7 +194,7 @@
                 });
             };
             obj[ids.ICIBA_LOWER_CASE] = function (text, time) {
-                ajax('http://www.iciba.com/' + encodeURIComponent(text.toLowerCase()), function (rst) {
+                ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text.toLowerCase()), function (rst) {
                     putEngineResult(ids.ICIBA_LOWER_CASE, parseIciba(rst), time);
                     showContent();
                 }, function (rst) {
@@ -323,21 +315,19 @@
         img.setAttribute('title', obj.name);
         img.setAttribute('icon-id', obj.id);
         img.addEventListener('mouseup', function () {
-            if (!isDrag()) { // 没有拖动鼠标抬起的时候触发点击事件
-                if (engineId == obj.id) {
-                    return; // 已经是当前翻译引擎
-                }
-                contentList.innerHTML = ''; // 清空翻译内容列表
-                content.style.display = 'block'; // 立马显示翻译面板
-                content.scrollTop = 0; // 翻译面板滚动到顶端
-                content.scrollLeft = 0; // 翻译面板滚动到左端
-                engineId = obj.id; // 翻译引擎 ID
-                engineTriggerTime = new Date().getTime(); // 引擎触发时间
-                engineActivateShow(); // 显示翻译引擎指示器
-                audioEngines = []; // 清空发音引擎
-                engineResult = {}; // 清空翻译引擎结果集
-                obj.trigger(selected, engineTriggerTime); // 启动翻译引擎
+            if (engineId == obj.id) {
+                return; // 已经是当前翻译引擎
             }
+            contentList.innerHTML = ''; // 清空翻译内容列表
+            displayContent(); // 立马显示翻译面板
+            content.scrollTop = 0; // 翻译面板滚动到顶端
+            content.scrollLeft = 0; // 翻译面板滚动到左端
+            engineId = obj.id; // 翻译引擎 ID
+            engineTriggerTime = new Date().getTime(); // 引擎触发时间
+            engineActivateShow(); // 显示翻译引擎指示器
+            audioEngines = []; // 清空发音引擎
+            engineResult = {}; // 清空翻译引擎结果集
+            obj.trigger(selected, engineTriggerTime); // 启动翻译引擎
         });
         icon.appendChild(img);
     });
@@ -491,12 +481,7 @@
     }
     /**是否包含汉字*/
     function hasChineseByRange(str) {
-        for (var i = 0; i < str.length; i++) {
-            if (str.charCodeAt(i) >= 0x4E00 && str.charCodeAt(i) <= 0x9FBF) {
-                return true;
-            }
-        }
-        return false;
+        return /[\u4e00-\u9fa5]/ig.test(str);
     }
     /**uuid*/
     function uuid() {
@@ -539,18 +524,27 @@
             .replace(/<\/(.+?)>/g, '</' + tag + '>');
     }
     // html 字符串转 DOM
-    function htmlToDom(htmlStr) {
+    function htmlToDom(html) {
         var div = document.createElement('div');
-        div.innerHTML = htmlStr;
+        div.innerHTML = html;
         return div;
     }
     /**清理 html*/
-    function cleanHtml(htmlStr) {
-        return htmlStr.replace(/<script[\s\S]*?<\/script>/ig, '')
+    function cleanHtml(html) {
+        html = html.replace(/<script[\s\S]*?<\/script>/ig, '')
             .replace(/<link[\s\S]*?>/ig, '')
             .replace(/<style[\s\S]*?<\/style>/ig, '')
-            .replace(/<img[\s\S]*?>/ig, '')
-            .replace(/on[a-z]*=".*?"/ig, '');
+            .replace(/<img[\s\S]*?>/ig, '');
+        html = cleanAttr(html, 'on[a-z]*');
+        return html;
+    }
+    /**
+     * 清理指定属性（忽略大小写）
+     * @param attr 支持正则表示（如“on[a-z]*”，表示清理“on”开头的属性：onclick、onmove等）
+     */
+    function cleanAttr(html, attr) {
+        var regex = ' ' + attr + '="([^"<>]*)"';
+        return html.replace(new RegExp(regex, 'ig'), '');
     }
     /**带异常处理的 createObjectURL*/
     function createObjectURLWithTry(blob) {
@@ -612,7 +606,7 @@
         var rst = true;
         var count = 0;
         idsType.forEach(function (id) {
-            if (count < 1) { // 判断指定数量的完成情况
+            if (count < 0) { // 判断指定数量的完成情况
                 count++;
                 if (!(id in engineResult)) {
                     log('isAllDone(not found):' + id);
@@ -623,6 +617,43 @@
         return rst;
     }
     /**显示内容面板*/
+    function displayContent() {
+        var panelHeight = 241 + 8; // icon 展开后总高度
+        var panelWidth = 320 + 8; // icon 展开后总宽度
+        // 计算位置
+        log('content position:',
+            'window.scrollY', window.scrollY,
+            'document.documentElement.scrollTop', document.documentElement.scrollTop,
+            'document.body.scrollTop', document.body.scrollTop,
+            'window.innerHeight', window.innerHeight,
+            'document.documentElement.clientHeight', document.documentElement.clientHeight,
+            'document.body.clientHeight', document.body.clientHeight,
+            'icon.style.top', icon.style.top,
+            'window.scrollX', window.scrollX,
+            'document.documentElement.scrollLeft', document.documentElement.scrollLeft,
+            'document.body.scrollLeft', document.body.scrollLeft,
+            'window.innerWidth', window.innerWidth,
+            'document.documentElement.clientWidth', document.documentElement.clientWidth,
+            'document.body.clientWidth', document.body.clientWidth,
+            'icon.style.left', icon.style.left
+        );
+        if (parseInt(icon.style.top) < document.documentElement.scrollTop) {
+            log('Y adjust top');
+            icon.style.top = parseInt(document.documentElement.scrollTop) + 'px';
+        } else if (parseInt(icon.style.top) + panelHeight > document.documentElement.scrollTop + document.documentElement.clientHeight) {
+            log('Y adjust bottom');
+            icon.style.top = parseInt(document.documentElement.scrollTop + document.documentElement.clientHeight - panelHeight) + 'px';
+        }
+        if (parseInt(icon.style.left) < document.documentElement.scrollLeft) {
+            log('X adjust left');
+            icon.style.left = parseInt(document.documentElement.scrollLeft) + 'px';
+        } else if (parseInt(icon.style.left) + panelWidth > document.documentElement.scrollLeft + document.documentElement.clientWidth) {
+            log('X adjust right');
+            icon.style.left = parseInt(document.documentElement.scrollLeft + document.documentElement.clientWidth - panelWidth) + 'px';
+        }
+        content.style.display = 'block';
+    }
+    /**内容面板填充数据*/
     function showContent() {
         log('showContent:', idsType, engineResult);
         if (isAllDone()) {
@@ -634,11 +665,11 @@
         // 发音
         audioEngines = []; // 清空防止多次渲染
         audioEngines.push({
-            name: '♪us',
+            name: '♪US',
             url: 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=2'
         });
         audioEngines.push({
-            name: '♪uk',
+            name: '♪UK',
             url: 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=1'
         });
         var audio = document.createElement('tr-audio');
@@ -680,8 +711,6 @@
                     title.setAttribute('rel', 'noreferrer noopener');
                     title.setAttribute('target', '_blank');
                     title.setAttribute('href', href);
-                    // 事件
-                    title.addEventListener('click', linkEvent);
                     contentList.appendChild(title);
                 }
                 contentList.appendChild(engineResult[id]);
@@ -715,9 +744,6 @@
     }
     /**发音*/
     function play(obj) {
-        if (isDrag()) { // 拖动时候不触发发音
-            return;
-        }
         var audio = new iframeWin.Audio();
         ajax(obj.url, function (rst, res) {
             audio.src = createObjectURLWithTry(res.response);
@@ -738,12 +764,6 @@
             play(obj);
         });
         return type;
-    }
-    /**链接点击事件*/
-    function linkEvent(e) {
-        if (isDrag()) { // 拖动时候不触发跳转
-            e.preventDefault();
-        }
     }
     /**有道词典排版*/
     function parseYoudao(rst) {
@@ -808,16 +828,32 @@
         var dom = document.createElement('div');
         dom.setAttribute('class', ids.ICIBA);
         try {
+            rst = /dict.innerHTML='(.*?)';\n   \tdict.style.display = "block";/g.exec(rst)[1];
+            rst = rst
+                .replace(/\\"/g, '"')
+                .replace(/\\'/g, '\'')
+                .replace(/onclick=/g, 'data-onclick=');
+            rst = cleanAttr(rst, 'style');
+            // 标识符处理
+            var symbolRegex = /(<span class="icIBahyI-fl">.*?(?: xml:lang=).*?<\/span>)/ig;
+            var symbolMatch;
+            var symbolResult = [];
+            while ((symbolMatch = symbolRegex.exec(rst)) != null) {
+                symbolResult.push(symbolMatch[1]);
+            }
+            symbolResult.forEach(function (str) {
+                rst = rst.replace(str,
+                    str.replace(/\[英\]/g, '英')
+                    .replace(/\[美\]/g, '美')
+                );
+            });
             rst = cleanHtml(rst)
                 .replace(/(?:a>)/ig, 'span>')
-                .replace(/(?:<a)/ig, '<span')
-                .replace(/style=".*?"/ig, '')
-                .replace(/<span class="prop">释义<\/span>/ig, '<span class="prop">释义：<\/span>')
-                .replace(/<h1 class="base-word abbr chinese change-base">变形<\/h1>/ig, '');
+                .replace(/(?:<a)/ig, '<span');
             var doc = htmlToDom(rst);
             // 发音
-            doc.querySelectorAll('[ms-on-mouseover]').forEach(function (ele) {
-                var str = ele.getAttribute('ms-on-mouseover');
+            doc.querySelectorAll('[title="真人发音"],[title="机器发音"]').forEach(function (ele) {
+                var str = ele.getAttribute('data-onclick');
                 var regex = /'(http:\/\/.*?)'/ig;
                 var match = regex.exec(str);
                 if (match && match.length >= 1) {
@@ -828,9 +864,7 @@
                 }
             });
             // 内容
-            doc.querySelectorAll('.in-base .in-base-top,.in-base .base-list,.in-base .change').forEach(function (ele) {
-                dom.appendChild(ele);
-            });
+            dom.appendChild(doc);
         } catch (error) {
             log(error);
             dom.appendChild(htmlToDom(error));
