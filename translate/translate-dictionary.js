@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      3.1
+// @version      3.2
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -29,11 +29,13 @@
     *{word-wrap:break-word!important;word-break:break-word!important}
     a{color:#36f;text-decoration:none;cursor:pointer}
     a:hover{text-decoration:underline}
-    img{cursor:pointer;display:inline-block;width:22px;height:22px;border:1px solid #dfe1e5;border-radius:22px;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
+    img{cursor:pointer;display:inline-block;width:22px;height:22px;border:1px solid #dfe1e5;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
     img:last-of-type{margin-right:auto}
     img:hover{border:1px solid #c6c6c6;-webkit-box-shadow:1px 1px 3px rgba(0,0,0,0.1);box-shadow:1px 1px 3px rgba(0,0,0,0.1)}
-    img[activate]{border:1px solid transparent;-webkit-box-shadow:0 0 0 1px #f90;box-shadow:0 0 0 1px #f90}
-    tr-icon{display:none;position:absolute;padding:2px;margin:0;cursor:move;box-sizing:content-box;font-size:13px;text-align:left;border:0;color:black;z-index:2147483647;background:#fff;border-radius:2px;-webkit-box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 1px rgba(0,0,0,0.08);box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 1px rgba(0,0,0,0.08)}
+    img[activate]{border:1px solid #f90}
+    img[activate]:hover{border:1px solid #f90;-webkit-box-shadow:unset;box-shadow:unset}
+    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;box-sizing:content-box;font-size:13px;text-align:left;border:0;color:black;z-index:2147483647;background:transparent}
+    tr-icon[activate]{background:#fff;-webkit-box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08);box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08)}
     tr-audio{display:block;margin-bottom:5px}
     tr-audio a{margin-right:1em;font-size:80%}
     tr-audio a:last-of-type{margin-right:auto}
@@ -103,7 +105,7 @@
     .cambridge .pos-body{margin-left:1em}
     .iciba strong{font-size:1em;font-weight:normal}
     .iciba p{padding:0;margin:0}
-    .iciba .icIBahyI-footer{display:none}
+    .iciba .icIBahyI-footer,.iciba .icIBahyI-suggest{display:none}
     .iciba .icIBahyI-prons{color:#777}
     .iciba .icIBahyI-eg{margin-right:1em}
     `;
@@ -318,6 +320,7 @@
             if (engineId == obj.id) {
                 return; // 已经是当前翻译引擎
             }
+            icon.setAttribute('activate', 'activate'); // 标注面板展开
             contentList.innerHTML = ''; // 清空翻译内容列表
             displayContent(); // 立马显示翻译面板
             content.scrollTop = 0; // 翻译面板滚动到顶端
@@ -601,25 +604,10 @@
             engineResult[id] = value;
         }
     }
-    /**翻译引擎结果集状态判断*/
-    function isAllDone() {
-        var rst = true;
-        var count = 0;
-        idsType.forEach(function (id) {
-            if (count < 0) { // 判断指定数量的完成情况
-                count++;
-                if (!(id in engineResult)) {
-                    log('isAllDone(not found):' + id);
-                    rst = false;
-                }
-            }
-        });
-        return rst;
-    }
     /**显示内容面板*/
     function displayContent() {
-        var panelHeight = 241 + 8; // icon 展开后总高度
-        var panelWidth = 320 + 8; // icon 展开后总宽度
+        var panelHeight = 237 + 8; // icon 展开后总高度
+        var panelWidth = 316 + 8; // icon 展开后总宽度
         // 计算位置
         log('content position:',
             'window.scrollY', window.scrollY,
@@ -655,12 +643,6 @@
     }
     /**内容面板填充数据*/
     function showContent() {
-        log('showContent:', idsType, engineResult);
-        if (isAllDone()) {
-            log('showContent allDone');
-        } else {
-            return;
-        }
         log('showContent rendering');
         // 发音
         audioEngines = []; // 清空防止多次渲染
@@ -711,6 +693,7 @@
                     title.setAttribute('rel', 'noreferrer noopener');
                     title.setAttribute('target', '_blank');
                     title.setAttribute('href', href);
+                    title.setAttribute('title', '打开源网站');
                     contentList.appendChild(title);
                 }
                 contentList.appendChild(engineResult[id]);
@@ -734,6 +717,7 @@
     /**隐藏 icon*/
     function hideIcon() {
         icon.style.display = 'none';
+        icon.removeAttribute('activate'); // 标注面板关闭
         content.style.display = 'none';
         engineId = '';
         engineTriggerTime = 0;
@@ -760,6 +744,7 @@
         type.innerHTML = obj.name;
         type.setAttribute('href', 'javascript:void(0)');
         type.setAttribute('class', 'audio-button');
+        type.setAttribute('title', '点击发音');
         type.addEventListener('mouseup', function () {
             play(obj);
         });
