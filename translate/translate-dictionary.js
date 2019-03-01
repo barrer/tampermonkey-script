@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      3.2
+// @version      3.3
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -813,7 +813,8 @@
         var dom = document.createElement('div');
         dom.setAttribute('class', ids.ICIBA);
         try {
-            rst = /dict.innerHTML='(.*?)';\n   \tdict.style.display = "block";/g.exec(rst)[1];
+            rst = rst.replace(/\n/g, ' ');
+            rst = /dict.innerHTML='(.*)';    \tdict.style.display = "block";/g.exec(rst)[1];
             rst = rst
                 .replace(/\\"/g, '"')
                 .replace(/\\'/g, '\'')
