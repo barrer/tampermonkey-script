@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      3.3
+// @version      3.4
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -340,7 +340,7 @@
     var root = document.createElement('div');
     document.documentElement.appendChild(root);
     var shadow = root.attachShadow({
-        mode: 'open'
+        mode: 'closed'
     });
     // iframe 工具库加入 Shadow
     shadow.appendChild(iframe);
@@ -625,19 +625,21 @@
             'document.body.clientWidth', document.body.clientWidth,
             'icon.style.left', icon.style.left
         );
-        if (parseInt(icon.style.top) < document.documentElement.scrollTop) {
+        var scrollTop = Math.max(parseInt(document.documentElement.scrollTop), parseInt(document.body.scrollTop));
+        var scrollLeft = Math.max(parseInt(document.documentElement.scrollLeft), parseInt(document.body.scrollLeft));
+        if (parseInt(icon.style.top) < scrollTop) {
             log('Y adjust top');
-            icon.style.top = parseInt(document.documentElement.scrollTop) + 'px';
-        } else if (parseInt(icon.style.top) + panelHeight > document.documentElement.scrollTop + document.documentElement.clientHeight) {
+            icon.style.top = scrollTop + 'px';
+        } else if (parseInt(icon.style.top) + panelHeight > scrollTop + document.documentElement.clientHeight) {
             log('Y adjust bottom');
-            icon.style.top = parseInt(document.documentElement.scrollTop + document.documentElement.clientHeight - panelHeight) + 'px';
+            icon.style.top = parseInt(scrollTop + document.documentElement.clientHeight - panelHeight) + 'px';
         }
-        if (parseInt(icon.style.left) < document.documentElement.scrollLeft) {
+        if (parseInt(icon.style.left) < scrollLeft) {
             log('X adjust left');
-            icon.style.left = parseInt(document.documentElement.scrollLeft) + 'px';
-        } else if (parseInt(icon.style.left) + panelWidth > document.documentElement.scrollLeft + document.documentElement.clientWidth) {
+            icon.style.left = scrollLeft + 'px';
+        } else if (parseInt(icon.style.left) + panelWidth > scrollLeft + document.documentElement.clientWidth) {
             log('X adjust right');
-            icon.style.left = parseInt(document.documentElement.scrollLeft + document.documentElement.clientWidth - panelWidth) + 'px';
+            icon.style.left = parseInt(scrollLeft + document.documentElement.clientWidth - panelWidth) + 'px';
         }
         content.style.display = 'block';
     }
