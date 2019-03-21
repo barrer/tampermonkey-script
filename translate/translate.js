@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      4.8
+// @version      4.9
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、汉典、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -21,13 +21,11 @@
     var style = document.createElement('style');
     style.textContent = `
     *{word-wrap:break-word!important}
-    img{cursor:pointer;display:inline-block;width:22px;height:22px;border:1px solid #dfe1e5;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
+    img{cursor:pointer;display:inline-block;width:16px;height:16px;border:1px solid #dfe1e5;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
     img:last-of-type{margin-right:auto}
-    img:hover{border:1px solid #c6c6c6;-webkit-box-shadow:1px 1px 3px rgba(0,0,0,0.1);box-shadow:1px 1px 3px rgba(0,0,0,0.1)}
+    img:hover{border:1px solid #c6c6c6}
+    img[is-more]{display:none}
     tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;background:transparent;box-sizing:content-box;font-size:13px;text-align:left;border:0;color:black;z-index:2147473647}
-    tr-back-forward{display:none;position:fixed;top:0;left:0;padding:0;margin:0;font-size:16px;text-align:left;border:0;cursor:move;background:transparent;z-index:2147473647}
-    tr-back-forward a{text-decoration:none;font-size:16px;cursor:pointer;display:inline;padding:0;margin:0;margin-right:4px}
-    tr-back-forward a:last-of-type{margin-right:auto}
     `;
     // iframe 工具库
     var iframe = document.createElement('iframe');
@@ -37,13 +35,11 @@
     var gm = {
         TEXT: 'barrer.translate.data.transfer.text',
         REDIRECT_URL: 'barrer.translate.data.transfer.redirect_url',
-        MORE: 'barrer.translate.data.config.more',
         HIDE: 'barrer.translate.data.config.hide',
         SORT: 'barrer.translate.data.config.sort',
         reset: function () {
             GM_deleteValue(this.TEXT);
             GM_deleteValue(this.REDIRECT_URL);
-            GM_deleteValue(this.MORE);
             GM_deleteValue(this.HIDE);
             GM_deleteValue(this.SORT);
         },
@@ -120,12 +116,10 @@
                 host: ['more.example.com'],
                 popup: function (text) {
                     icon.querySelectorAll('img[is-more]').forEach(function (ele) {
-                        if (ele.style.display == 'none') {
-                            ele.style.display = 'inline-block';
-                            gm.set(gm.MORE, true);
-                        } else {
+                        if (ele.style.display == 'inline-block') {
                             ele.style.display = 'none';
-                            gm.set(gm.MORE, false);
+                        } else {
+                            ele.style.display = 'inline-block';
                         }
                     });
                 },
@@ -444,16 +438,6 @@
             icon.style.top = e.pageY + 10 + 'px';
             icon.style.left = e.pageX + 10 + 'px';
             icon.style.display = 'block';
-            // 图标开关初始化
-            var isMore = gm.get(gm.MORE, false);
-            log('isMore: ' + isMore);
-            icon.querySelectorAll('img[is-more]').forEach(function (ele) {
-                if (isMore) {
-                    ele.style.display = 'inline-block';
-                } else {
-                    ele.style.display = 'none';
-                }
-            });
             // 兼容部分 Content Security Policy
             icon.style.position = 'absolute';
             icon.style.zIndex = '2147473647';
