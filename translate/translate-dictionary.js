@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      3.5
+// @version      3.6
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
 // @include      https://*/*
 // @include      file:///*
-// @run-at document-end
+// @run-at       document-start
 // @connect      youdao.com
 // @connect      iciba.com
 // @connect      translate.google.cn
@@ -26,6 +26,7 @@
     var style = document.createElement('style');
     style.textContent = `
     /*组件样式*/
+    :host{all:initial!important}
     *{word-wrap:break-word!important;word-break:break-word!important}
     a{color:#36f;text-decoration:none;cursor:pointer}
     a:hover{text-decoration:underline}
