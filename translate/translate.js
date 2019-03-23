@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      5.2
+// @version      5.3
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、汉典、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -392,24 +392,27 @@
     shadow.appendChild(style); // 内部样式表
     shadow.appendChild(link); // 外部样式表
     shadow.appendChild(icon); // 翻译图标加入 Shadow
-    // 重定向
-    var redirect_url = gm.get(gm.REDIRECT_URL, '');
-    log('redirect_url:' + redirect_url);
-    if (redirect_url && window.location.host == 'example.com') {
-        document.documentElement.style.display = 'none';
-        document.body.innerHTML = '<a id="redirect_url" rel="noreferrer noopener" href="' + redirect_url + '">' + redirect_url + '</a>';
-        document.querySelector('#redirect_url').click();
-        gm.set(gm.REDIRECT_URL, '');
-        return;
-    }
-    // 弹出后的新页面判断是否进行自动化处理
-    var text = gm.get(gm.TEXT, '');
-    log(gm.TEXT + ': ' + text);
-    log('url: ' + window.location.href);
-    log('host: ' + window.location.host);
-    if (text && window.location.host in hostCustomMap) {
-        dataTransfer.beforeCustom(hostCustomMap[window.location.host]);
-    }
+    window.addEventListener('DOMContentLoaded', (e) => {
+        log('DOM fully loaded and parsed');
+        // 重定向
+        var redirect_url = gm.get(gm.REDIRECT_URL, '');
+        log('redirect_url:' + redirect_url);
+        if (redirect_url && window.location.host == 'example.com') {
+            document.documentElement.style.display = 'none';
+            document.body.innerHTML = '<a id="redirect_url" rel="noreferrer noopener" href="' + redirect_url + '">' + redirect_url + '</a>';
+            document.querySelector('#redirect_url').click();
+            gm.set(gm.REDIRECT_URL, '');
+            return;
+        }
+        // 弹出后的新页面判断是否进行自动化处理
+        var text = gm.get(gm.TEXT, '');
+        log(gm.TEXT + ': ' + text);
+        log('url: ' + window.location.href);
+        log('host: ' + window.location.host);
+        if (text && window.location.host in hostCustomMap) {
+            dataTransfer.beforeCustom(hostCustomMap[window.location.host]);
+        }
+    });
     // 鼠标事件：防止选中的文本消失
     document.addEventListener('mousedown', function (e) {
         if (e.target == icon || (e.target.parentNode && e.target.parentNode == icon)) { // 点击了翻译图标
