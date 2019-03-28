@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      3.6
+// @version      3.7
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -26,6 +26,7 @@
     var style = document.createElement('style');
     style.textContent = `
     /*组件样式*/
+    :host{all:unset!important}
     :host{all:initial!important}
     *{word-wrap:break-word!important;word-break:break-word!important}
     a{color:#36f;text-decoration:none;cursor:pointer}
@@ -628,19 +629,39 @@
         );
         var scrollTop = Math.max(parseInt(document.documentElement.scrollTop), parseInt(document.body.scrollTop));
         var scrollLeft = Math.max(parseInt(document.documentElement.scrollLeft), parseInt(document.body.scrollLeft));
+        var clientHeight = [parseInt(document.documentElement.clientHeight), parseInt(document.body.clientHeight)].filter(function (x) {
+            return x <= parseInt(window.innerHeight);
+        }).sort(function (a, b) {
+            return a > b ? -1 : (a == b ? 0 : 1);
+        })[0]; // 找出最大值且小于等于 window 的高度
+        var clientWidth = [parseInt(document.documentElement.clientWidth), parseInt(document.body.clientWidth)].filter(function (x) {
+            return x <= parseInt(window.innerWidth);
+        }).sort(function (a, b) {
+            return a > b ? -1 : (a == b ? 0 : 1);
+        })[0]; // 找出最大值且小于等于 window 的宽度
+        var iconNewTop = -1;
         if (parseInt(icon.style.top) < scrollTop) {
             log('Y adjust top');
-            icon.style.top = scrollTop + 'px';
-        } else if (parseInt(icon.style.top) + panelHeight > scrollTop + document.documentElement.clientHeight) {
+            iconNewTop = scrollTop;
+        } else if (parseInt(icon.style.top) + panelHeight > scrollTop + clientHeight) {
             log('Y adjust bottom');
-            icon.style.top = parseInt(scrollTop + document.documentElement.clientHeight - panelHeight) + 'px';
+            iconNewTop = parseInt(scrollTop + clientHeight - panelHeight);
         }
+        if (iconNewTop != -1 && Math.abs(iconNewTop - parseInt(icon.style.top)) <= panelHeight) {
+            log('Y set iconNewTop', iconNewTop);
+            icon.style.top = iconNewTop + 'px';
+        }
+        var iconNewLeft = -1;
         if (parseInt(icon.style.left) < scrollLeft) {
             log('X adjust left');
-            icon.style.left = scrollLeft + 'px';
-        } else if (parseInt(icon.style.left) + panelWidth > scrollLeft + document.documentElement.clientWidth) {
+            iconNewLeft = scrollLeft;
+        } else if (parseInt(icon.style.left) + panelWidth > scrollLeft + clientWidth) {
             log('X adjust right');
-            icon.style.left = parseInt(scrollLeft + document.documentElement.clientWidth - panelWidth) + 'px';
+            iconNewLeft = parseInt(scrollLeft + clientWidth - panelWidth);
+        }
+        if (iconNewLeft != -1 && Math.abs(iconNewLeft - parseInt(icon.style.left)) <= panelWidth) {
+            log('X set iconNewLeft', iconNewLeft);
+            icon.style.left = iconNewLeft + 'px';
         }
         content.style.display = 'block';
     }
@@ -715,7 +736,7 @@
     /**显示翻译引擎指示器*/
     function engineActivateShow() {
         engineActivateHide();
-        icon.querySelector('img[icon-id="' + engineId + '"').setAttribute('activate', 'activate');
+        icon.querySelector('img[icon-id="' + engineId + '"]').setAttribute('activate', 'activate');
     }
     /**隐藏 icon*/
     function hideIcon() {
