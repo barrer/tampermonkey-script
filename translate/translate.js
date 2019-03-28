@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      5.4
+// @version      5.5
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、汉典、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -20,6 +20,7 @@
     /**样式*/
     var style = document.createElement('style');
     style.textContent = `
+    :host{all:unset!important}
     :host{all:initial!important}
     *{word-wrap:break-word!important}
     img{cursor:pointer;display:inline-block;width:16px;height:16px;border:1px solid #dfe1e5;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
