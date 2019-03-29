@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      3.7
+// @version      3.8
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -41,7 +41,7 @@
     tr-audio{display:block;margin-bottom:5px}
     tr-audio a{margin-right:1em;font-size:80%}
     tr-audio a:last-of-type{margin-right:auto}
-    tr-content{display:block;max-width:300px;max-height:200px;width:300px;height:200px;overflow-x:auto;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:13px;line-height:normal}
+    tr-content{display:block;max-width:300px;max-height:200px;width:300px;height:200px;overflow-x:auto;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:13px;font-weight:normal;line-height:normal}
     .list-title~.list-title{margin-top:1em}
     .list-title{color:#00c;display:inline-block}
     .list-title:hover{text-decoration:none}
@@ -127,6 +127,8 @@
     content.appendChild(contentList);
     // 发音引擎
     var audioEngines = []; // [{name: 'abc', url: 'http://*.mp3', ...}, ...]
+    // 发音缓存
+    var audioCache = {}; // {'mp3 download url': Audio}
     // 翻译引擎结果集
     var engineResult = {}; // id: DOM 
     // ID 类别
@@ -331,6 +333,7 @@
             engineTriggerTime = new Date().getTime(); // 引擎触发时间
             engineActivateShow(); // 显示翻译引擎指示器
             audioEngines = []; // 清空发音引擎
+            audioCache = {}; // 清空发音缓存
             engineResult = {}; // 清空翻译引擎结果集
             obj.trigger(selected, engineTriggerTime); // 启动翻译引擎
         });
@@ -746,16 +749,23 @@
         engineId = '';
         engineTriggerTime = 0;
         audioEngines = [];
+        audioCache = {};
         engineResult = {};
         engineActivateHide();
         forceStopDrag();
     }
     /**发音*/
     function play(obj) {
+        if (obj.url in audioCache) { // 查找缓存
+            log('audio in cache', obj, audioCache);
+            audioCache[obj.url].play();
+            return;
+        }
         var audio = new iframeWin.Audio();
         ajax(obj.url, function (rst, res) {
             audio.src = createObjectURLWithTry(res.response);
-            audio.play();
+            audioCache[obj.url] = audio; // 放入缓存
+            audio.play(); // 播放
         }, function (rst) {
             log(rst);
         }, {
