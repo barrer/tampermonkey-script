@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      3.8
+// @version      3.9
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -128,7 +128,7 @@
     // 发音引擎
     var audioEngines = []; // [{name: 'abc', url: 'http://*.mp3', ...}, ...]
     // 发音缓存
-    var audioCache = {}; // {'mp3 download url': Audio}
+    var audioCache = {}; // {'mp3 download url': blob}
     // 翻译引擎结果集
     var engineResult = {}; // id: DOM 
     // ID 类别
@@ -756,21 +756,22 @@
     }
     /**发音*/
     function play(obj) {
+        var audio = new iframeWin.Audio();
         if (obj.url in audioCache) { // 查找缓存
             log('audio in cache', obj, audioCache);
-            audioCache[obj.url].play();
-            return;
-        }
-        var audio = new iframeWin.Audio();
-        ajax(obj.url, function (rst, res) {
-            audio.src = createObjectURLWithTry(res.response);
-            audioCache[obj.url] = audio; // 放入缓存
+            audio.src = createObjectURLWithTry(audioCache[obj.url]);
             audio.play(); // 播放
-        }, function (rst) {
-            log(rst);
-        }, {
-            responseType: 'blob'
-        });
+        } else {
+            ajax(obj.url, function (rst, res) {
+                audio.src = createObjectURLWithTry(res.response);
+                audioCache[obj.url] = res.response; // 放入缓存
+                audio.play(); // 播放
+            }, function (rst) {
+                log(rst);
+            }, {
+                responseType: 'blob'
+            });
+        }
     }
     /**得到发音按钮*/
     function getPlayButton(obj) {
