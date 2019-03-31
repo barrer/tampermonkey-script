@@ -209,7 +209,7 @@
                 });
             };
             obj[ids.YOUDAO] = function (text, time) {
-                ajax('http://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + encodeURIComponent(text), function (rst) {
+                ajax('https://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + encodeURIComponent(text), function (rst) {
                     putEngineResult(ids.YOUDAO, parseYoudao(rst), time)
                     showContent();
                 }, function (rst) {
@@ -218,7 +218,7 @@
                 });
             };
             obj[ids.YOUDAO_LOWER_CASE] = function (text, time) {
-                ajax('http://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + encodeURIComponent(text.toLowerCase()), function (rst) {
+                ajax('https://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + encodeURIComponent(text.toLowerCase()), function (rst) {
                     putEngineResult(ids.YOUDAO_LOWER_CASE, parseYoudao(rst), time);
                     showContent();
                 }, function (rst) {
