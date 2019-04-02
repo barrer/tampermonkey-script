@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      3.9
+// @version      4.0
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -131,29 +131,31 @@
     var audioCache = {}; // {'mp3 download url': blob}
     // 翻译引擎结果集
     var engineResult = {}; // id: DOM 
-    // ID 类别
+    // 唯一 ID
     var ids = {
         ICIBA: 'iciba',
         ICIBA_LOWER_CASE: 'icibaLowerCase',
         YOUDAO: 'youdao',
         YOUDAO_LOWER_CASE: 'youdaoLowerCase',
         BING: 'bing',
-        BING_LOWER_CASE: 'bingLowerCase',
         HJENGLISH: 'hjenglish',
         GOOGLE: 'google',
         CAMBRIDGE: 'cambridge'
     };
+    // 唯一 ID 扩展
     var idsExtension = {
+        // ID 组
         LIST_DICT: [ids.ICIBA, ids.YOUDAO, ids.BING, ids.HJENGLISH, ids.CAMBRIDGE],
-        LIST_DICT_LOWER_CASE: [ids.ICIBA, ids.ICIBA_LOWER_CASE, ids.YOUDAO, ids.YOUDAO_LOWER_CASE, ids.BING, ids.BING_LOWER_CASE, ids.HJENGLISH, ids.CAMBRIDGE],
+        LIST_DICT_LOWER_CASE: [ids.ICIBA, ids.ICIBA_LOWER_CASE, ids.YOUDAO, ids.YOUDAO_LOWER_CASE, ids.BING, ids.HJENGLISH, ids.CAMBRIDGE],
         LIST_GOOGLE: [ids.GOOGLE],
+        // 去重比对（大小写翻译可能一样）
         lowerCaseMap: (function () {
             var obj = {};
             obj[ids.ICIBA_LOWER_CASE] = ids.ICIBA;
             obj[ids.YOUDAO_LOWER_CASE] = ids.YOUDAO;
-            obj[ids.BING_LOWER_CASE] = ids.BING;
             return obj;
         })(),
+        // 标题
         names: (function () {
             var obj = {};
             obj[ids.ICIBA] = '《金山词霸》';
@@ -161,12 +163,12 @@
             obj[ids.YOUDAO] = '《有道词典》';
             obj[ids.YOUDAO_LOWER_CASE] = '';
             obj[ids.BING] = '《Bing 词典》';
-            obj[ids.BING_LOWER_CASE] = '';
             obj[ids.HJENGLISH] = '《沪江小D》';
             obj[ids.GOOGLE] = '《谷歌翻译》';
             obj[ids.CAMBRIDGE] = '《剑桥高阶》';
             return obj;
         })(),
+        // 跳转到网站（“%q%”占位符或者 function text -> return URL）
         links: (function () {
             var obj = {};
             obj[ids.ICIBA] = 'http://www.iciba.com/%q%';
@@ -174,7 +176,6 @@
             obj[ids.YOUDAO] = 'https://dict.youdao.com/w/eng/%q%';
             obj[ids.YOUDAO_LOWER_CASE] = '';
             obj[ids.BING] = 'https://cn.bing.com/dict/search?q=%q%';
-            obj[ids.BING_LOWER_CASE] = '';
             obj[ids.HJENGLISH] = 'https://dict.hjenglish.com/w/%q%';
             obj[ids.GOOGLE] = function (text) {
                 var rst = '';
@@ -188,6 +189,7 @@
             obj[ids.CAMBRIDGE] = 'https://dictionary.cambridge.org/dictionary/english-chinese-simplified/%q%';
             return obj;
         })(),
+        // 翻译引擎
         engines: (function () {
             var obj = {};
             obj[ids.ICIBA] = function (text, time) {
@@ -232,15 +234,6 @@
                     showContent();
                 }, function (rst) {
                     putEngineResult(ids.BING, htmlToDom('error: 无法连接翻译服务'), time);
-                    showContent();
-                });
-            };
-            obj[ids.BING_LOWER_CASE] = function (text, time) {
-                ajax('https://cn.bing.com/dict/search?q=' + encodeURIComponent(text.toLowerCase()), function (rst) {
-                    putEngineResult(ids.BING_LOWER_CASE, parseBing(rst), time);
-                    showContent();
-                }, function (rst) {
-                    putEngineResult(ids.BING_LOWER_CASE, htmlToDom('error: 无法连接翻译服务'), time);
                     showContent();
                 });
             };
@@ -296,7 +289,7 @@
         trigger: function (text, time) {
             idsType = idsExtension.LIST_DICT;
             if (text != text.toLowerCase()) {
-                idsType = idsExtension.LIST_DICT_LOWER_CASE; // 大小写各请求一次
+                idsType = idsExtension.LIST_DICT_LOWER_CASE; // 改为大小写 ID 组（大小写各请求一次）
             }
             idsType.forEach(function (id) {
                 idsExtension.engines[id](text, time);
@@ -322,20 +315,21 @@
         img.setAttribute('icon-id', obj.id);
         img.addEventListener('mouseup', function () {
             if (engineId == obj.id) {
-                return; // 已经是当前翻译引擎
+                // 已经是当前翻译引擎，不做任何处理
+            } else {
+                icon.setAttribute('activate', 'activate'); // 标注面板展开
+                contentList.innerHTML = ''; // 清空翻译内容列表
+                displayContent(); // 立马显示翻译面板
+                content.scrollTop = 0; // 翻译面板滚动到顶端
+                content.scrollLeft = 0; // 翻译面板滚动到左端
+                engineId = obj.id; // 翻译引擎 ID
+                engineTriggerTime = new Date().getTime(); // 引擎触发时间
+                engineActivateShow(); // 显示翻译引擎指示器
+                audioEngines = []; // 清空发音引擎
+                audioCache = {}; // 清空发音缓存
+                engineResult = {}; // 清空翻译引擎结果集
+                obj.trigger(selected, engineTriggerTime); // 启动翻译引擎
             }
-            icon.setAttribute('activate', 'activate'); // 标注面板展开
-            contentList.innerHTML = ''; // 清空翻译内容列表
-            displayContent(); // 立马显示翻译面板
-            content.scrollTop = 0; // 翻译面板滚动到顶端
-            content.scrollLeft = 0; // 翻译面板滚动到左端
-            engineId = obj.id; // 翻译引擎 ID
-            engineTriggerTime = new Date().getTime(); // 引擎触发时间
-            engineActivateShow(); // 显示翻译引擎指示器
-            audioEngines = []; // 清空发音引擎
-            audioCache = {}; // 清空发音缓存
-            engineResult = {}; // 清空翻译引擎结果集
-            obj.trigger(selected, engineTriggerTime); // 启动翻译引擎
         });
         icon.appendChild(img);
     });
