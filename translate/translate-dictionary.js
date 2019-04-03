@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      4.0
+// @version      4.1
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -126,7 +126,7 @@
     // 初始化内容面板
     content.appendChild(contentList);
     // 发音引擎
-    var audioEngines = []; // [{name: 'abc', url: 'http://*.mp3', ...}, ...]
+    var audioEngines = []; // [{name: 'abc', url: 'https://*.mp3', ...}, ...]
     // 发音缓存
     var audioCache = {}; // {'mp3 download url': blob}
     // 翻译引擎结果集
@@ -211,7 +211,7 @@
                 });
             };
             obj[ids.YOUDAO] = function (text, time) {
-                ajax('http://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + encodeURIComponent(text), function (rst) {
+                ajax('https://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + encodeURIComponent(text), function (rst) {
                     putEngineResult(ids.YOUDAO, parseYoudao(rst), time)
                     showContent();
                 }, function (rst) {
@@ -220,7 +220,7 @@
                 });
             };
             obj[ids.YOUDAO_LOWER_CASE] = function (text, time) {
-                ajax('http://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + encodeURIComponent(text.toLowerCase()), function (rst) {
+                ajax('https://dict.youdao.com/jsonapi?xmlVersion=5.1&jsonversion=2&q=' + encodeURIComponent(text.toLowerCase()), function (rst) {
                     putEngineResult(ids.YOUDAO_LOWER_CASE, parseYoudao(rst), time);
                     showContent();
                 }, function (rst) {
@@ -669,11 +669,11 @@
         audioEngines = []; // 清空防止多次渲染
         audioEngines.push({
             name: '♪US',
-            url: 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=2'
+            url: 'https://dict.youdao.com/dictvoice?audio=' + selected + '&type=2'
         });
         audioEngines.push({
             name: '♪UK',
-            url: 'http://dict.youdao.com/dictvoice?audio=' + selected + '&type=1'
+            url: 'https://dict.youdao.com/dictvoice?audio=' + selected + '&type=1'
         });
         var audio = document.createElement('tr-audio');
         audioEngines.forEach(function (obj) {
