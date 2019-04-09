@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      4.1
+// @version      4.2
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -631,11 +631,17 @@
         }).sort(function (a, b) {
             return a > b ? -1 : (a == b ? 0 : 1);
         })[0]; // 找出最大值且小于等于 window 的高度
+        if (!clientHeight) { // 网页缩放导致可能数组为空（[0] 为 undefined）
+            clientHeight = parseInt(window.innerHeight);
+        }
         var clientWidth = [parseInt(document.documentElement.clientWidth), parseInt(document.body.clientWidth)].filter(function (x) {
             return x <= parseInt(window.innerWidth);
         }).sort(function (a, b) {
             return a > b ? -1 : (a == b ? 0 : 1);
         })[0]; // 找出最大值且小于等于 window 的宽度
+        if (!clientWidth) { // 网页缩放导致可能数组为空（[0] 为 undefined）
+            clientWidth = parseInt(window.innerWidth);
+        }
         var iconNewTop = -1;
         if (parseInt(icon.style.top) < scrollTop) {
             log('Y adjust top');
