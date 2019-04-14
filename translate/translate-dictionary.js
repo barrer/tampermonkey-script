@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      4.3
+// @version      4.4
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -756,22 +756,29 @@
     }
     /**发音*/
     function play(obj) {
-        var audio = new iframeWin.Audio();
         if (obj.url in audioCache) { // 查找缓存
             log('audio in cache', obj, audioCache);
-            audio.src = createObjectURLWithTry(audioCache[obj.url]);
-            audio.play(); // 播放
+            playArrayBuffer(audioCache[obj.url]); // 播放
         } else {
             ajax(obj.url, function (rst, res) {
-                audio.src = createObjectURLWithTry(res.response);
                 audioCache[obj.url] = res.response; // 放入缓存
-                audio.play(); // 播放
+                playArrayBuffer(audioCache[obj.url]); // 播放
             }, function (rst) {
                 log(rst);
             }, {
-                responseType: 'blob'
+                responseType: 'arraybuffer'
             });
         }
+    }
+    /**播放 ArrayBuffer 音频*/
+    function playArrayBuffer(arrayBuffer) {
+        var context = new iframeWin.AudioContext() || new iframeWin.webkitAudioContext();
+        context.decodeAudioData(arrayBuffer.slice(0), function (audioBuffer) { // `slice(0)`克隆一份（`decodeAudioData`后原数组清空）
+            var bufferSource = context.createBufferSource();
+            bufferSource.buffer = audioBuffer;
+            bufferSource.connect(context.destination);
+            bufferSource.start();
+        });
     }
     /**得到发音按钮*/
     function getPlayButton(obj) {
