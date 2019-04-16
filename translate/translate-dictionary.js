@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      4.4
+// @version      4.5
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -42,9 +42,9 @@
     tr-audio a{margin-right:1em;font-size:80%}
     tr-audio a:last-of-type{margin-right:auto}
     tr-content{display:block;max-width:300px;max-height:200px;width:300px;height:200px;overflow-x:auto;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:13px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
-    .list-title~.list-title{margin-top:1em}
-    .list-title{color:#00c;display:inline-block}
-    .list-title:hover{text-decoration:none}
+    tr-engine~tr-engine{margin-top:1em}
+    tr-engine .title{color:#00c;display:inline-block}
+    tr-engine .title:hover{text-decoration:none}
     /*各引擎样式*/
     .google .sentences,.google .trans,.google .orig,.google .dict,.google .pos,.none{display:block}
     .google .backend,.google .entry,.google .base_form,.google .pos_enum,.google .src,.google .confidence,.google .ld_result,.none{display:none}
@@ -125,10 +125,8 @@
         idsType; // 当前翻译面板内容列表数组
     // 初始化内容面板
     content.appendChild(contentList);
-    // 发音引擎
-    var audioEngines = []; // [{name: 'abc', url: 'https://*.mp3', ...}, ...]
     // 发音缓存
-    var audioCache = {}; // {'mp3 download url': blob}
+    var audioCache = {}; // {'mp3 download url': data}
     // 翻译引擎结果集
     var engineResult = {}; // id: DOM 
     // 唯一 ID
@@ -294,6 +292,8 @@
             idsType.forEach(function (id) {
                 idsExtension.engines[id](text, time);
             });
+            initContent(); // 初始化翻译面板
+            displayContent(); // 立马显示翻译面板
         }
     }, {
         name: '谷歌翻译',
@@ -304,6 +304,8 @@
             idsType.forEach(function (id) {
                 idsExtension.engines[id](text, time);
             });
+            initContent(); // 初始化翻译面板
+            displayContent(); // 立马显示翻译面板
         }
     }];
     // 添加翻译引擎图标
@@ -318,14 +320,9 @@
                 // 已经是当前翻译引擎，不做任何处理
             } else {
                 icon.setAttribute('activate', 'activate'); // 标注面板展开
-                contentList.innerHTML = ''; // 清空翻译内容列表
-                displayContent(); // 立马显示翻译面板
-                content.scrollTop = 0; // 翻译面板滚动到顶端
-                content.scrollLeft = 0; // 翻译面板滚动到左端
                 engineId = obj.id; // 翻译引擎 ID
                 engineTriggerTime = new Date().getTime(); // 引擎触发时间
                 engineActivateShow(); // 显示翻译引擎指示器
-                audioEngines = []; // 清空发音引擎
                 audioCache = {}; // 清空发音缓存
                 engineResult = {}; // 清空翻译引擎结果集
                 obj.trigger(selected, engineTriggerTime); // 启动翻译引擎
@@ -666,43 +663,37 @@
             log('X set iconNewLeft', iconNewLeft);
             icon.style.left = iconNewLeft + 'px';
         }
+        content.scrollTop = 0; // 翻译面板滚动到顶端
+        content.scrollLeft = 0; // 翻译面板滚动到左端
         content.style.display = 'block';
     }
-    /**内容面板填充数据*/
-    function showContent() {
-        log('showContent rendering');
+    /**初始化面板*/
+    function initContent() {
+        contentList.innerHTML = ''; // 清空翻译内容列表
         // 发音
-        audioEngines = []; // 清空防止多次渲染
-        audioEngines.push({
+        var audio = document.createElement('tr-audio');
+        audio.appendChild(getPlayButton({
             name: '♪US',
             url: 'https://dict.youdao.com/dictvoice?audio=' + selected + '&type=2'
-        });
-        audioEngines.push({
+        }));
+        audio.appendChild(getPlayButton({
             name: '♪UK',
             url: 'https://dict.youdao.com/dictvoice?audio=' + selected + '&type=1'
-        });
-        var audio = document.createElement('tr-audio');
-        audioEngines.forEach(function (obj) {
-            audio.appendChild(getPlayButton(obj));
-        });
-        contentList.innerHTML = ''; // 清空翻译内容列表
-        // 比较大小写内容
-        var needDel = {};
-        for (var key in idsExtension.lowerCaseMap) {
-            if (engineResult[key] &&
-                engineResult[idsExtension.lowerCaseMap[key]] &&
-                (engineResult[key].innerHTML == engineResult[idsExtension.lowerCaseMap[key]].innerHTML ||
-                    engineResult[key].innerHTML.toLowerCase() == engineResult[idsExtension.lowerCaseMap[key]].innerHTML.toLowerCase())) {
-                needDel[key] = key;
-            }
+        }));
+        if (engineId != 'icon-google') { // 谷歌翻译不显示发音图标
+            contentList.appendChild(audio);
         }
+        // 初始化翻译引擎结构（此时内容暂未填充）
         idsType.forEach(function (id) {
-            if (engineResult[id] && !(id in needDel)) {
+            if (id in idsExtension.names) {
+                var engine = document.createElement('tr-engine');
+                engine.setAttribute('data-id', id);
+                engine.style.display = 'none'; // 暂无内容默认隐藏
+                // 标题
                 if (idsExtension.names[id]) {
                     var title = document.createElement('a');
                     title.innerHTML = idsExtension.names[id];
-                    title.setAttribute('class', 'list-title');
-                    // 添加跳转
+                    title.setAttribute('class', 'title');
                     var href = 'javascript:void(0)';
                     if (idsExtension.links[id]) {
                         var link = idsExtension.links[id];
@@ -721,14 +712,34 @@
                     title.setAttribute('target', '_blank');
                     title.setAttribute('href', href);
                     title.setAttribute('title', '打开源网站');
-                    contentList.appendChild(title);
+                    engine.appendChild(title);
                 }
-                contentList.appendChild(engineResult[id]);
+                contentList.appendChild(engine);
             }
         });
-        if (engineId != 'icon-google') { // 谷歌翻译不显示发音图标
-            contentList.insertBefore(audio, contentList.childNodes[0]);
+    }
+    /**内容面板填充数据*/
+    function showContent() {
+        // 比较大小写内容
+        var needDel = {};
+        for (var key in idsExtension.lowerCaseMap) {
+            if (engineResult[key] &&
+                engineResult[idsExtension.lowerCaseMap[key]] &&
+                (engineResult[key].innerHTML == engineResult[idsExtension.lowerCaseMap[key]].innerHTML ||
+                    engineResult[key].innerHTML.toLowerCase() == engineResult[idsExtension.lowerCaseMap[key]].innerHTML.toLowerCase())) {
+                needDel[key] = key;
+            }
         }
+        // 填充指定引擎内容
+        idsType.forEach(function (id) {
+            if (engineResult[id] && !(id in needDel)) {
+                var engine = contentList.querySelector('tr-engine[data-id="' + id + '"]');
+                if (engine) {
+                    engine.appendChild(engineResult[id]);
+                    engine.style.display = 'block';
+                }
+            }
+        });
     }
     /**隐藏翻译引擎指示器*/
     function engineActivateHide() {
@@ -748,10 +759,9 @@
         content.style.display = 'none';
         engineId = '';
         engineTriggerTime = 0;
-        audioEngines = [];
+        engineActivateHide();
         audioCache = {};
         engineResult = {};
-        engineActivateHide();
         forceStopDrag();
     }
     /**发音*/
