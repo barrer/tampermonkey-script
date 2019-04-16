@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      4.7
+// @version      4.8
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -723,10 +723,11 @@
     function showContent() {
         // 填充已有结果集引擎内容
         idsType.forEach(function (id) {
-            if (engineResult[id]) {
+            if (engineResult[id] && !(id in idsExtension.lowerCaseMap)) { // 跳过小写的内容填充
                 var engine = contentList.querySelector('tr-engine[data-id="' + id + '"]');
                 if (engine) {
                     engine.appendChild(engineResult[id]);
+                    engine.removeAttribute('data-id');
                     engine.style.display = 'block';
                 }
             }
@@ -735,11 +736,13 @@
         for (var id in idsExtension.lowerCaseMap) {
             if (engineResult[id] &&
                 engineResult[idsExtension.lowerCaseMap[id]] &&
-                (engineResult[id].innerHTML == engineResult[idsExtension.lowerCaseMap[id]].innerHTML ||
-                    engineResult[id].innerHTML.toLowerCase() == engineResult[idsExtension.lowerCaseMap[id]].innerHTML.toLowerCase())) {
+                engineResult[id].innerHTML != engineResult[idsExtension.lowerCaseMap[id]].innerHTML &&
+                engineResult[id].innerHTML.toLowerCase() != engineResult[idsExtension.lowerCaseMap[id]].innerHTML.toLowerCase()) {
                 var engine = contentList.querySelector('tr-engine[data-id="' + id + '"]');
                 if (engine) {
-                    engine.style.display = 'none'; // 隐藏小写内容
+                    engine.appendChild(engineResult[id]);
+                    engine.removeAttribute('data-id');
+                    engine.style.display = 'block';
                 }
             }
         }
