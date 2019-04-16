@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      4.5
+// @version      4.6
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -720,19 +720,9 @@
     }
     /**内容面板填充数据*/
     function showContent() {
-        // 比较大小写内容
-        var needDel = {};
-        for (var key in idsExtension.lowerCaseMap) {
-            if (engineResult[key] &&
-                engineResult[idsExtension.lowerCaseMap[key]] &&
-                (engineResult[key].innerHTML == engineResult[idsExtension.lowerCaseMap[key]].innerHTML ||
-                    engineResult[key].innerHTML.toLowerCase() == engineResult[idsExtension.lowerCaseMap[key]].innerHTML.toLowerCase())) {
-                needDel[key] = key;
-            }
-        }
-        // 填充指定引擎内容
+        // 填充已有结果集引擎内容
         idsType.forEach(function (id) {
-            if (engineResult[id] && !(id in needDel)) {
+            if (engineResult[id]) {
                 var engine = contentList.querySelector('tr-engine[data-id="' + id + '"]');
                 if (engine) {
                     engine.appendChild(engineResult[id]);
@@ -740,6 +730,18 @@
                 }
             }
         });
+        // 比较大小写内容
+        for (var id in idsExtension.lowerCaseMap) {
+            if (engineResult[id] &&
+                engineResult[idsExtension.lowerCaseMap[id]] &&
+                (engineResult[id].innerHTML == engineResult[idsExtension.lowerCaseMap[id]].innerHTML ||
+                    engineResult[id].innerHTML.toLowerCase() == engineResult[idsExtension.lowerCaseMap[id]].innerHTML.toLowerCase())) {
+                var engine = contentList.querySelector('tr-engine[data-id="' + id + '"]');
+                if (engine) {
+                    engine.style.display = 'none'; // 隐藏小写内容
+                }
+            }
+        }
     }
     /**隐藏翻译引擎指示器*/
     function engineActivateHide() {
