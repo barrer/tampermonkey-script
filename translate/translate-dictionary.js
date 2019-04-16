@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      4.6
+// @version      4.7
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -36,6 +36,7 @@
     img:hover{border:1px solid #c6c6c6}
     img[activate]{border:1px solid #f90}
     img[activate]:hover{border:1px solid #f90}
+    table{font-size:inherit;color:inherit}
     tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;box-sizing:content-box;font-size:13px;text-align:left;border:0;color:black;z-index:2147483647;background:transparent}
     tr-icon[activate]{background:#fff;-webkit-box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08);box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08)}
     tr-audio{display:block;margin-bottom:5px}
