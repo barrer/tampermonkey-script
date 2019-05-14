@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      5.0
+// @version      5.1
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -234,6 +234,10 @@
                 }, function (rst) {
                     putEngineResult(ids.BING, htmlToDom('error: 无法连接翻译服务'), time);
                     showContent();
+                }, {
+                    headers: {
+                        'Cookie': 'ENSEARCH=BENVER=0;' // 中文结果
+                    }
                 });
             };
             obj[ids.HJENGLISH] = function (text, time) {
@@ -875,7 +879,7 @@
             rst = /dict.innerHTML='(.*)';    \tdict.style.display = "block";/g.exec(rst)[1];
             rst = rst
                 .replace(/\\"/g, '"')
-                .replace(/\\'/g, '\'')// inner-city 这个词会多一个斜杠，金山词霸的数据有些许瑕疵
+                .replace(/\\'/g, '\'') // inner-city 这个词会多一个斜杠，金山词霸的数据有些许瑕疵
                 .replace(/onclick=/g, 'data-onclick=');
             rst = cleanAttr(rst, 'style');
             // 标识符处理
