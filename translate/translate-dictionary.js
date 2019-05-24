@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      5.2
+// @version      5.3
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -844,6 +844,30 @@
                     tr += '<div>' + element.tr[0].l.i[0] + '</div>';
                 });
                 html += tr;
+            }
+            // 网络释义
+            if (rstJson.web_trans &&
+                rstJson.web_trans['web-translation'] &&
+                rstJson.web_trans['web-translation'].length > 0 &&
+                rstJson.web_trans['web-translation'][0]['@same'] &&
+                rstJson.web_trans['web-translation'][0]['@same'] == 'true' &&
+                rstJson.web_trans['web-translation'][0].trans &&
+                rstJson.web_trans['web-translation'][0].trans.length > 0) {
+                var webTrans = '网络：';
+                rstJson.web_trans['web-translation'][0].trans.forEach(function (obj, i) {
+                    if (obj.value) {
+                        if (obj.cls && obj.cls.cl && obj.cls.cl.length > 0) {
+                            obj.cls.cl.forEach(function (cl) {
+                                webTrans += '[' + cl + ']';
+                            });
+                        }
+                        webTrans += obj.value;
+                        if (rstJson.web_trans['web-translation'][0].trans.length - 1 != i) {
+                            webTrans += '；';
+                        }
+                    }
+                });
+                html += '<div>' + webTrans + '</div>';
             }
             // 中英翻译
             if (rstJson.ce_new && rstJson.ce_new.word) {
