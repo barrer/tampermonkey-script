@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      5.3
+// @version      5.4
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -29,32 +29,33 @@
     :host{all:unset!important}
     :host{all:initial!important}
     *{word-wrap:break-word!important;word-break:break-word!important}
-    a{color:#36f;text-decoration:none;cursor:pointer}
-    a:hover{text-decoration:underline}
-    img{cursor:pointer;display:inline-block;width:16px;height:16px;border:1px solid #dfe1e5;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
+    a{color:#00c;text-decoration:none;cursor:pointer}
+    a:hover{text-decoration:none}
+    a:active{text-decoration:underline}
+    img{cursor:pointer;display:inline-block;width:16px;height:16px;border:1px solid #dfe1e5;border-radius:4px;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
     img:last-of-type{margin-right:auto}
-    img:hover{border:1px solid #c6c6c6}
+    img:hover{border:1px solid #f90}
     img[activate]{border:1px solid #f90}
     img[activate]:hover{border:1px solid #f90}
     table{font-size:inherit;color:inherit}
-    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;box-sizing:content-box;font-size:13px;text-align:left;border:0;color:black;z-index:2147483647;background:transparent}
+    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;box-sizing:content-box;font-size:13px;text-align:left;border:0;border-radius:4px;color:black;z-index:2147483647;background:transparent}
     tr-icon[activate]{background:#fff;-webkit-box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08);box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08)}
     tr-audio{display:block;margin-bottom:5px}
     tr-audio a{margin-right:1em;font-size:80%}
     tr-audio a:last-of-type{margin-right:auto}
     tr-content{display:block;max-width:300px;max-height:200px;width:300px;height:200px;overflow-x:auto;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:13px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
     tr-engine~tr-engine{margin-top:1em}
-    tr-engine .title{color:#00c;display:inline-block}
+    tr-engine .title{color:#00c;display:inline-block;font-weight:bold}
     tr-engine .title:hover{text-decoration:none}
     /*各引擎样式*/
     .google .sentences,.google .trans,.google .orig,.google .dict,.google .pos,.none{display:block}
     .google .backend,.google .entry,.google .base_form,.google .pos_enum,.google .src,.google .confidence,.google .ld_result,.none{display:none}
-    .google .orig{font-style:italic;color:#777}
+    .google .orig{color:#777}
     .google .pos{margin-top:1em}
     .google .pos:before{content:"<"}
     .google .pos:after{content:">"}
-    .google .terms:before{content:"【"}
-    .google .terms:after{content:"】"}
+    .google .terms:before{content:"〔"}
+    .google .terms:after{content:"〕"}
     .google .terms{margin-right:.2em}
     .youdao .pron{margin-right:1em}
     .youdao .phone{color:#777;margin-right:1em}
@@ -157,14 +158,14 @@
         // 标题
         names: (function () {
             var obj = {};
-            obj[ids.ICIBA] = '《金山词霸》';
+            obj[ids.ICIBA] = '金山词霸';
             obj[ids.ICIBA_LOWER_CASE] = '';
-            obj[ids.YOUDAO] = '《有道词典》';
+            obj[ids.YOUDAO] = '有道词典';
             obj[ids.YOUDAO_LOWER_CASE] = '';
-            obj[ids.BING] = '《Bing 词典》';
-            obj[ids.HJENGLISH] = '《沪江小D》';
-            obj[ids.GOOGLE] = '《谷歌翻译》';
-            obj[ids.CAMBRIDGE] = '《剑桥高阶》';
+            obj[ids.BING] = 'Bing 词典';
+            obj[ids.HJENGLISH] = '沪江小D';
+            obj[ids.GOOGLE] = '谷歌翻译';
+            obj[ids.CAMBRIDGE] = '剑桥高阶';
             return obj;
         })(),
         // 跳转到网站（“%q%”占位符或者 function text -> return URL）
@@ -678,11 +679,11 @@
         // 发音
         var audio = document.createElement('tr-audio');
         audio.appendChild(getPlayButton({
-            name: '♪US',
+            name: 'US',
             url: 'https://dict.youdao.com/dictvoice?audio=' + selected + '&type=2'
         }));
         audio.appendChild(getPlayButton({
-            name: '♪UK',
+            name: 'UK',
             url: 'https://dict.youdao.com/dictvoice?audio=' + selected + '&type=1'
         }));
         if (engineId != 'icon-google') { // 谷歌翻译不显示发音图标

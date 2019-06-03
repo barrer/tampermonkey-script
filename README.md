@@ -24,10 +24,6 @@
 * 支持面板拖动
 * 支持面板自动调整位置
 
-### PDF 划词翻译（PDF.js viewer）
-
-![translate-pdf.png](translate/translate-pdf.png)
-
 同时安装：
 
 ① 划词翻译：多词典查询  
