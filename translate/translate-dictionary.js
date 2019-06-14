@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      5.6
+// @version      5.7
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -43,7 +43,7 @@
     tr-audio{display:block;margin-bottom:5px}
     tr-audio a{margin-right:1em;font-size:80%}
     tr-audio a:last-of-type{margin-right:auto}
-    tr-content{display:block;max-width:300px;width:300px;overflow-x:hidden;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:13px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
+    tr-content{display:block;width:300px;overflow-x:hidden;overflow-y:scroll;background:white;padding:8px;margin:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:13px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
     tr-engine~tr-engine{margin-top:1em}
     tr-engine .title{color:#00c;display:inline-block;font-weight:bold}
     tr-engine .title:hover{text-decoration:none}
@@ -606,77 +606,6 @@
             engineResult[id] = value;
         }
     }
-    /**显示内容面板*/
-    function displayContent() {
-        var panelWidth = 316 + 8; // icon 展开后总宽度(8:冗余距离)
-        var panelHeight = 0; // icon 展开后总高度
-        // 计算位置
-        log('content position:',
-            'window.scrollY', window.scrollY,
-            'document.documentElement.scrollTop', document.documentElement.scrollTop,
-            'document.body.scrollTop', document.body.scrollTop,
-            'window.innerHeight', window.innerHeight,
-            'document.documentElement.clientHeight', document.documentElement.clientHeight,
-            'document.body.clientHeight', document.body.clientHeight,
-            'icon.style.top', icon.style.top,
-            'window.scrollX', window.scrollX,
-            'document.documentElement.scrollLeft', document.documentElement.scrollLeft,
-            'document.body.scrollLeft', document.body.scrollLeft,
-            'window.innerWidth', window.innerWidth,
-            'document.documentElement.clientWidth', document.documentElement.clientWidth,
-            'document.body.clientWidth', document.body.clientWidth,
-            'icon.style.left', icon.style.left
-        );
-        var scrollTop = Math.max(parseInt(document.documentElement.scrollTop), parseInt(document.body.scrollTop));
-        var scrollLeft = Math.max(parseInt(document.documentElement.scrollLeft), parseInt(document.body.scrollLeft));
-        var clientHeight = [parseInt(document.documentElement.clientHeight), parseInt(document.body.clientHeight)].filter(function (x) {
-            return x <= parseInt(window.innerHeight);
-        }).sort(function (a, b) {
-            return a > b ? -1 : (a == b ? 0 : 1);
-        })[0]; // 找出最大值且小于等于 window 的高度
-        if (!clientHeight) { // 网页缩放导致可能数组为空（[0] 为 undefined）
-            clientHeight = parseInt(window.innerHeight);
-        }
-        var clientWidth = [parseInt(document.documentElement.clientWidth), parseInt(document.body.clientWidth)].filter(function (x) {
-            return x <= parseInt(window.innerWidth);
-        }).sort(function (a, b) {
-            return a > b ? -1 : (a == b ? 0 : 1);
-        })[0]; // 找出最大值且小于等于 window 的宽度
-        if (!clientWidth) { // 网页缩放导致可能数组为空（[0] 为 undefined）
-            clientWidth = parseInt(window.innerWidth);
-        }
-        // 计算“icon 展开后总高度”、内容高度
-        panelHeight = clientHeight - 8; // (8:冗余距离)
-        content.style.height = (panelHeight - 22 - 5 - 2 * 2 - 12) + 'px'; // 22:图标高度, 5:margin, 2*2:padding, 12:box-shadow
-        // 设置新的位置
-        var iconNewTop = -1;
-        if (parseInt(icon.style.top) < scrollTop) {
-            log('Y adjust top');
-            iconNewTop = scrollTop;
-        } else if (parseInt(icon.style.top) + panelHeight > scrollTop + clientHeight) {
-            log('Y adjust bottom');
-            iconNewTop = parseInt(scrollTop + clientHeight - panelHeight);
-        }
-        if (iconNewTop != -1 && Math.abs(iconNewTop - parseInt(icon.style.top)) <= panelHeight) {
-            log('Y set iconNewTop', iconNewTop);
-            icon.style.top = iconNewTop + 'px';
-        }
-        var iconNewLeft = -1;
-        if (parseInt(icon.style.left) < scrollLeft) {
-            log('X adjust left');
-            iconNewLeft = scrollLeft;
-        } else if (parseInt(icon.style.left) + panelWidth > scrollLeft + clientWidth) {
-            log('X adjust right');
-            iconNewLeft = parseInt(scrollLeft + clientWidth - panelWidth);
-        }
-        if (iconNewLeft != -1 && Math.abs(iconNewLeft - parseInt(icon.style.left)) <= panelWidth) {
-            log('X set iconNewLeft', iconNewLeft);
-            icon.style.left = iconNewLeft + 'px';
-        }
-        content.scrollTop = 0; // 翻译面板滚动到顶端
-        content.scrollLeft = 0; // 翻译面板滚动到左端
-        content.style.display = 'block';
-    }
     /**初始化面板*/
     function initContent() {
         contentList.innerHTML = ''; // 清空翻译内容列表
@@ -727,6 +656,77 @@
                 contentList.appendChild(engine);
             }
         });
+    }
+    /**显示内容面板*/
+    function displayContent() {
+        var panelWidth = 326 + 8; // icon 展开后总宽度(8:冗余距离)
+        var panelHeight = 0; // icon 展开后总高度
+        // 计算位置
+        log('content position:',
+            'window.scrollY', window.scrollY,
+            'document.documentElement.scrollTop', document.documentElement.scrollTop,
+            'document.body.scrollTop', document.body.scrollTop,
+            'window.innerHeight', window.innerHeight,
+            'document.documentElement.clientHeight', document.documentElement.clientHeight,
+            'document.body.clientHeight', document.body.clientHeight,
+            'icon.style.top', icon.style.top,
+            'window.scrollX', window.scrollX,
+            'document.documentElement.scrollLeft', document.documentElement.scrollLeft,
+            'document.body.scrollLeft', document.body.scrollLeft,
+            'window.innerWidth', window.innerWidth,
+            'document.documentElement.clientWidth', document.documentElement.clientWidth,
+            'document.body.clientWidth', document.body.clientWidth,
+            'icon.style.left', icon.style.left
+        );
+        var scrollTop = Math.max(parseInt(document.documentElement.scrollTop), parseInt(document.body.scrollTop));
+        var scrollLeft = Math.max(parseInt(document.documentElement.scrollLeft), parseInt(document.body.scrollLeft));
+        var clientHeight = [parseInt(document.documentElement.clientHeight), parseInt(document.body.clientHeight)].filter(function (x) {
+            return x <= parseInt(window.innerHeight);
+        }).sort(function (a, b) {
+            return a > b ? -1 : (a == b ? 0 : 1);
+        })[0]; // 找出最大值且小于等于 window 的高度
+        if (!clientHeight) { // 网页缩放导致可能数组为空（[0] 为 undefined）
+            clientHeight = parseInt(window.innerHeight);
+        }
+        var clientWidth = [parseInt(document.documentElement.clientWidth), parseInt(document.body.clientWidth)].filter(function (x) {
+            return x <= parseInt(window.innerWidth);
+        }).sort(function (a, b) {
+            return a > b ? -1 : (a == b ? 0 : 1);
+        })[0]; // 找出最大值且小于等于 window 的宽度
+        if (!clientWidth) { // 网页缩放导致可能数组为空（[0] 为 undefined）
+            clientWidth = parseInt(window.innerWidth);
+        }
+        // 计算“icon 展开后总高度”、内容高度
+        panelHeight = clientHeight - 8; // (8:冗余距离)
+        content.style.height = (panelHeight - 22 - 5 * 2 - 8 * 2 - 12) + 'px'; // 图标高度, margin, padding, box-shadow
+        // 设置新的位置
+        var iconNewTop = -1;
+        if (parseInt(icon.style.top) < scrollTop) {
+            log('Y adjust top');
+            iconNewTop = scrollTop;
+        } else if (parseInt(icon.style.top) + panelHeight > scrollTop + clientHeight) {
+            log('Y adjust bottom');
+            iconNewTop = parseInt(scrollTop + clientHeight - panelHeight);
+        }
+        if (iconNewTop != -1 && Math.abs(iconNewTop - parseInt(icon.style.top)) <= panelHeight) {
+            log('Y set iconNewTop', iconNewTop);
+            icon.style.top = iconNewTop + 'px';
+        }
+        var iconNewLeft = -1;
+        if (parseInt(icon.style.left) < scrollLeft) {
+            log('X adjust left');
+            iconNewLeft = scrollLeft;
+        } else if (parseInt(icon.style.left) + panelWidth > scrollLeft + clientWidth) {
+            log('X adjust right');
+            iconNewLeft = parseInt(scrollLeft + clientWidth - panelWidth);
+        }
+        if (iconNewLeft != -1 && Math.abs(iconNewLeft - parseInt(icon.style.left)) <= panelWidth) {
+            log('X set iconNewLeft', iconNewLeft);
+            icon.style.left = iconNewLeft + 'px';
+        }
+        content.scrollTop = 0; // 翻译面板滚动到顶端
+        content.scrollLeft = 0; // 翻译面板滚动到左端
+        content.style.display = 'block';
     }
     /**内容面板填充数据*/
     function showContent() {
