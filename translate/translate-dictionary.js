@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      5.9
+// @version      6.0
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -43,7 +43,7 @@
     tr-audio{display:block;margin-bottom:5px}
     tr-audio a{margin-right:1em;font-size:80%}
     tr-audio a:last-of-type{margin-right:auto}
-    tr-content{display:block;width:300px;overflow-x:hidden;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:13px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
+    tr-content{display:block;width:374px;height:374px;overflow-x:hidden;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:13px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
     tr-engine~tr-engine{margin-top:1em}
     tr-engine .title{color:#00c;display:inline-block;font-weight:bold}
     tr-engine .title:hover{text-decoration:none}
@@ -659,8 +659,8 @@
     }
     /**显示内容面板*/
     function displayContent() {
-        var panelWidth = 316 + 8; // icon 展开后总宽度(8:冗余距离)
-        var panelHeight = 0; // icon 展开后总高度
+        var panelWidth = 390 + 8; // icon 展开后总宽度(8:冗余距离)
+        var panelHeight = 405 + 8; // icon 展开后总高度(8:冗余距离)
         // 计算位置
         log('content position:',
             'window.scrollY', window.scrollY,
@@ -696,9 +696,6 @@
         if (!clientWidth) { // 网页缩放导致可能数组为空（[0] 为 undefined）
             clientWidth = parseInt(window.innerWidth);
         }
-        // 计算“icon 展开后总高度”、内容高度
-        panelHeight = clientHeight - 8; // (8:冗余距离)
-        content.style.height = (panelHeight - 22 - 5 * 1 - 2 * 2 - 12) + 'px'; // 图标高度, margin, padding, box-shadow
         // 设置新的位置
         var iconNewTop = -1;
         if (parseInt(icon.style.top) < scrollTop) {
