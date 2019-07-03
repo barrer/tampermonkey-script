@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      6.1
+// @version      6.2
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -24,10 +24,13 @@
     // Your code here...
     /**样式*/
     var style = document.createElement('style');
-    var iconWidth = 300;
-    var iconHeight = 400;
-    var trContentWidth = iconWidth - 16; // 最终宽度 - 边距间隔
-    var trContentHeight = iconHeight - 31; // 最终高度 - 边距间隔
+    // <--- 可以自定义的变量
+    var fontSize = 14; // 字体大小
+    var iconWidth = 300; // 整个面板宽度
+    var iconHeight = 400; // 整个面板高度
+    // 可以自定义的变量 ---> （自定义变量修改后把 “@version” 版本号改为 “10000” 防止更新后消失）
+    var trContentWidth = iconWidth - 16; // 整个面板宽度 - 边距间隔 = 翻译正文宽度
+    var trContentHeight = iconHeight - 31; // 整个面板高度 - 边距间隔 = 翻译正文高度
     style.textContent = `
     /*组件样式*/
     :host{all:unset!important}
@@ -42,12 +45,12 @@
     img[activate]{border:1px solid #f90}
     img[activate]:hover{border:1px solid #f90}
     table{font-size:inherit;color:inherit}
-    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;box-sizing:content-box;font-size:13px;text-align:left;border:0;border-radius:4px;color:black;z-index:2147483647;background:transparent}
+    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;box-sizing:content-box;font-size:${fontSize}px;text-align:left;border:0;border-radius:4px;color:black;z-index:2147483647;background:transparent}
     tr-icon[activate]{background:#fff;-webkit-box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08);box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08)}
     tr-audio{display:block;margin-bottom:5px}
     tr-audio a{margin-right:1em;font-size:80%}
     tr-audio a:last-of-type{margin-right:auto}
-    tr-content{display:block;width:${trContentWidth}px;height:${trContentHeight}px;overflow-x:hidden;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:13px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
+    tr-content{display:block;width:${trContentWidth}px;height:${trContentHeight}px;overflow-x:hidden;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:${fontSize}px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
     tr-engine~tr-engine{margin-top:1em}
     tr-engine .title{color:#00c;display:inline-block;font-weight:bold}
     tr-engine .title:hover{text-decoration:none}
