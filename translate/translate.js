@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      6.3
+// @version      6.4
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -19,15 +19,16 @@
     // Your code here...
     /**样式*/
     var style = document.createElement('style');
+    var zIndex = '2147473647'; // 渲染图层
     style.textContent = `
     :host{all:unset!important}
     :host{all:initial!important}
     *{word-wrap:break-word!important}
-    img{cursor:pointer;display:inline-block;width:16px;height:16px;border:1px solid #dfe1e5;border-radius:4px;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
+    img{cursor:pointer;display:inline-block;width:20px;height:20px;border:1px solid #dfe1e5;border-radius:4px;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
     img:last-of-type{margin-right:auto}
     img:hover{border:1px solid #f90}
     img[is-more]{display:none}
-    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;background:transparent;box-sizing:content-box;font-size:13px;text-align:left;border:0;color:black;z-index:2147473647}
+    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;background:transparent;box-sizing:content-box;font-size:13px;text-align:left;border:0;color:black;z-index:${zIndex}}
     `;
     // iframe 工具库
     var iframe = document.createElement('iframe');
@@ -336,8 +337,10 @@
         });
     });
     log('hostCustomMap:', hostCustomMap);
-    // 翻译图标
-    var icon = document.createElement('tr-icon');
+    var icon = document.createElement('tr-icon'), // 翻译图标
+        selected, // 当前选中文本
+        pageX, // 图标显示的 X 坐标
+        pageY; // 图标显示的 Y 坐标
     // 绑定图标拖动事件
     var iconDrag = new Drag(icon);
     // 翻译引擎添加到图标
@@ -409,36 +412,11 @@
             e.preventDefault();
         }
     });
-    // 选中变化事件：当点击已经选中的文本的时候，隐藏翻译图标（此时浏览器动作是：选中的文本已经取消选中了）
-    document.addEventListener("selectionchange", function () {
-        log('selectionchange:' + window.getSelection().toString());
-        if (!window.getSelection().toString().trim()) {
-            hideIcon();
-        }
-    });
     // 鼠标事件：防止选中的文本消失；显示、隐藏翻译图标
-    document.addEventListener('mouseup', function (e) {
-        if (e.target == icon || (e.target.parentNode && e.target.parentNode == icon)) { // 点击了翻译图标
-            e.preventDefault();
-            return;
-        }
-        var text = window.getSelection().toString().trim();
-        log('click text:' + text);
-        log(e);
-        if (text && icon.style.display == 'none') {
-            log('show icon');
-            log(text + ' | ' + e.pageX + ' | ' + e.pageY);
-            icon.style.top = e.pageY + 8 + 'px';
-            icon.style.left = e.pageX + 4 + 'px';
-            icon.style.display = 'block';
-            // 兼容部分 Content Security Policy
-            icon.style.position = 'absolute';
-            icon.style.zIndex = '2147473647';
-        } else if (!text) {
-            log('hide icon');
-            hideIcon();
-        }
-    });
+    document.addEventListener('mouseup', showIcon);
+    // 选中变化事件
+    document.addEventListener('selectionchange', showIcon);
+    document.addEventListener('touchend', showIcon);
     /**日志输出*/
     function log() {
         var debug = false;
@@ -584,9 +562,52 @@
             iconDrag.unsetMouseMove();
         }
     }
+    /**显示 icon*/
+    function showIcon(e) {
+        log('showIcon event:', e);
+        var offsetX = 4; // 横坐标翻译图标偏移
+        var offsetY = 8; // 纵坐标翻译图标偏移
+        // 更新翻译图标 X、Y 坐标
+        if (e.pageX && e.pageY) { // 鼠标
+            log('mouse pageX/Y');
+            pageX = e.pageX;
+            pageY = e.pageY;
+        }
+        if (e.changedTouches) { // 触屏
+            if (e.changedTouches.length > 0) { // 多点触控选取第 1 个
+                log('touch pageX/Y');
+                pageX = e.changedTouches[0].pageX;
+                pageY = e.changedTouches[0].pageY;
+                // 触屏修改翻译图标偏移（Android、iOS 选中后的动作菜单一般在当前文字顶部，翻译图标则放到底部）
+                offsetX = -26; // 单个翻译图标块宽度
+                offsetY = 16 * 3; // 一般字体高度的 3 倍，距离系统自带动作菜单、选择光标太近会导致无法点按
+            }
+        }
+        log('selected:' + selected + ', pageX:' + pageX + ', pageY:' + pageY)
+        if (e.target == icon || (e.target.parentNode && e.target.parentNode == icon)) { // 点击了翻译图标
+            e.preventDefault();
+            return;
+        }
+        selected = window.getSelection().toString().trim(); // 当前选中文本
+        log('selected:' + selected + ', icon display:' + icon.style.display);
+        if (selected && icon.style.display != 'block' && pageX && pageY) { // 显示翻译图标
+            log('show icon');
+            icon.style.top = pageY + offsetY + 'px';
+            icon.style.left = pageX + offsetX + 'px';
+            icon.style.display = 'block';
+            // 兼容部分 Content Security Policy
+            icon.style.position = 'absolute';
+            icon.style.zIndex = zIndex;
+        } else if (!selected) { // 隐藏翻译图标
+            log('hide icon');
+            hideIcon();
+        }
+    }
     /**隐藏 icon*/
     function hideIcon() {
         icon.style.display = 'none';
+        pageX = 0;
+        pageY = 0;
         icon.querySelectorAll('img[is-more]').forEach(function (ele) {
             ele.style.display = 'none';
         });

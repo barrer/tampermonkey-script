@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      6.2
+// @version      6.3
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -24,13 +24,14 @@
     // Your code here...
     /**样式*/
     var style = document.createElement('style');
-    // <--- 可以自定义的变量
+    // >>>>> 可以自定义的变量
     var fontSize = 14; // 字体大小
     var iconWidth = 300; // 整个面板宽度
     var iconHeight = 400; // 整个面板高度
-    // 可以自定义的变量 ---> （自定义变量修改后把 “@version” 版本号改为 “10000” 防止更新后消失）
+    // 可以自定义的变量 <<<<< （自定义变量修改后把 “@version” 版本号改为 “10000” 防止更新后消失）
     var trContentWidth = iconWidth - 16; // 整个面板宽度 - 边距间隔 = 翻译正文宽度
-    var trContentHeight = iconHeight - 31; // 整个面板高度 - 边距间隔 = 翻译正文高度
+    var trContentHeight = iconHeight - 35; // 整个面板高度 - 边距间隔 = 翻译正文高度
+    var zIndex = '2147483647'; // 渲染图层
     style.textContent = `
     /*组件样式*/
     :host{all:unset!important}
@@ -39,18 +40,18 @@
     a{color:#00c;text-decoration:none;cursor:pointer}
     a:hover{text-decoration:none}
     a:active{text-decoration:underline}
-    img{cursor:pointer;display:inline-block;width:16px;height:16px;border:1px solid #dfe1e5;border-radius:4px;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
+    img{cursor:pointer;display:inline-block;width:20px;height:20px;border:1px solid #dfe1e5;border-radius:4px;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
     img:last-of-type{margin-right:auto}
     img:hover{border:1px solid #f90}
     img[activate]{border:1px solid #f90}
     img[activate]:hover{border:1px solid #f90}
     table{font-size:inherit;color:inherit}
-    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;box-sizing:content-box;font-size:${fontSize}px;text-align:left;border:0;border-radius:4px;color:black;z-index:2147483647;background:transparent}
+    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;box-sizing:content-box;font-size:${fontSize}px;text-align:left;border:0;border-radius:4px;color:black;z-index:${zIndex};background:transparent}
     tr-icon[activate]{background:#fff;-webkit-box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08);box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08)}
     tr-audio{display:block;margin-bottom:5px}
     tr-audio a{margin-right:1em;font-size:80%}
     tr-audio a:last-of-type{margin-right:auto}
-    tr-content{display:block;width:${trContentWidth}px;height:${trContentHeight}px;overflow-x:hidden;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:${fontSize}px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
+    tr-content{display:none;width:${trContentWidth}px;height:${trContentHeight}px;overflow-x:hidden;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:${fontSize}px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
     tr-engine~tr-engine{margin-top:1em}
     tr-engine .title{color:#00c;display:inline-block;font-weight:bold}
     tr-engine .title:hover{text-decoration:none}
@@ -131,7 +132,9 @@
         selected, // 当前选中文本
         engineId, // 当前翻译引擎
         engineTriggerTime, // 引擎触发时间（milliseconds）
-        idsType; // 当前翻译面板内容列表数组
+        idsType, // 当前翻译面板内容列表数组
+        pageX, // 图标显示的 X 坐标
+        pageY; // 图标显示的 Y 坐标
     // 初始化内容面板
     content.appendChild(contentList);
     // 发音缓存
@@ -257,7 +260,8 @@
                     showContent();
                 }, {
                     headers: {
-                        'Cookie': 'HJ_SID=' + uuid() + '; HJ_SSID_3=' + uuid() + '; HJ_CST=1; HJ_CSST_3=1; HJ_UID=' + uuid()
+                        'Cookie': 'HJ_SID=' + uuid() + '; HJ_SSID_3=' + uuid() + '; HJ_CST=1; HJ_CSST_3=1; HJ_UID=' + uuid(),
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
                     }
                 });
             };
@@ -376,37 +380,10 @@
         }
     });
     // 鼠标事件：防止选中的文本消失；显示、隐藏翻译图标
-    document.addEventListener('mouseup', function (e) {
-        log('mouseup event:', e);
-        if (e.target == icon || (e.target.parentNode && e.target.parentNode == icon)) { // 点击了翻译图标
-            e.preventDefault();
-            return;
-        }
-        selected = window.getSelection().toString().trim(); // 当前选中文本
-        log('click text:' + selected);
-        if (selected && icon.style.display == 'none') { // 显示翻译图标
-            log('show icon');
-            log(selected + ' | ' + e.pageX + ' | ' + e.pageY);
-            icon.style.top = e.pageY + 8 + 'px';
-            icon.style.left = e.pageX + 4 + 'px';
-            icon.style.display = 'block';
-            // 兼容部分 Content Security Policy
-            icon.style.position = 'absolute';
-            icon.style.zIndex = '2147483647';
-        } else if (!selected) { // 隐藏翻译图标
-            log('hide icon:mouseup');
-            hideIcon();
-        }
-    });
-    // 选中变化事件：当点击已经选中的文本的时候，隐藏翻译图标（此时浏览器动作是：选中的文本已经取消选中了）
-    document.addEventListener('selectionchange', function (e) {
-        log('selectionchange event:', e);
-        log('selectionchange:' + window.getSelection().toString());
-        if (!window.getSelection().toString().trim()) {
-            log('hide icon:selectionchange');
-            hideIcon();
-        }
-    });
+    document.addEventListener('mouseup', showIcon);
+    // 选中变化事件
+    document.addEventListener('selectionchange', showIcon);
+    document.addEventListener('touchend', showIcon);
     // 内容面板滚动事件
     content.addEventListener('scroll', function (e) {
         if (content.scrollHeight - content.scrollTop === content.clientHeight) {
@@ -771,6 +748,47 @@
         engineActivateHide();
         icon.querySelector('img[icon-id="' + engineId + '"]').setAttribute('activate', 'activate');
     }
+    /**显示 icon*/
+    function showIcon(e) {
+        log('showIcon event:', e);
+        var offsetX = 4; // 横坐标翻译图标偏移
+        var offsetY = 8; // 纵坐标翻译图标偏移
+        // 更新翻译图标 X、Y 坐标
+        if (e.pageX && e.pageY) { // 鼠标
+            log('mouse pageX/Y');
+            pageX = e.pageX;
+            pageY = e.pageY;
+        }
+        if (e.changedTouches) { // 触屏
+            if (e.changedTouches.length > 0) { // 多点触控选取第 1 个
+                log('touch pageX/Y');
+                pageX = e.changedTouches[0].pageX;
+                pageY = e.changedTouches[0].pageY;
+                // 触屏修改翻译图标偏移（Android、iOS 选中后的动作菜单一般在当前文字顶部，翻译图标则放到底部）
+                offsetX = -26; // 单个翻译图标块宽度
+                offsetY = 16 * 3; // 一般字体高度的 3 倍，距离系统自带动作菜单、选择光标太近会导致无法点按
+            }
+        }
+        log('selected:' + selected + ', pageX:' + pageX + ', pageY:' + pageY)
+        if (e.target == icon || (e.target.parentNode && e.target.parentNode == icon)) { // 点击了翻译图标
+            e.preventDefault();
+            return;
+        }
+        selected = window.getSelection().toString().trim(); // 当前选中文本
+        log('selected:' + selected + ', icon display:' + icon.style.display);
+        if (selected && icon.style.display != 'block' && pageX && pageY) { // 显示翻译图标
+            log('show icon');
+            icon.style.top = pageY + offsetY + 'px';
+            icon.style.left = pageX + offsetX + 'px';
+            icon.style.display = 'block';
+            // 兼容部分 Content Security Policy
+            icon.style.position = 'absolute';
+            icon.style.zIndex = zIndex;
+        } else if (!selected) { // 隐藏翻译图标
+            log('hide icon');
+            hideIcon();
+        }
+    }
     /**隐藏 icon*/
     function hideIcon() {
         icon.style.display = 'none';
@@ -778,6 +796,8 @@
         content.style.display = 'none';
         engineId = '';
         engineTriggerTime = 0;
+        pageX = 0;
+        pageY = 0;
         engineActivateHide();
         audioCache = {};
         engineResult = {};

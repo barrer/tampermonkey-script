@@ -6,10 +6,12 @@
 
 ![translate.png](translate/translate.png)
 
+![translate.png](translate/translate-android.png)
+
 特色：  
 * 划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
+* 支持浏览器：Google Chrome、Firefox、Safari、Firefox for Android（无拖动）
 * 支持顺序自定义
-* 支持隐藏图标
 * 支持显示更多图标
 * 支持图标拖动
 
@@ -17,10 +19,12 @@
 
 ![translate-dictionary.png](translate/translate-dictionary.png)
 
+![translate-dictionary.png](translate/translate-dictionary-android.png)
+
 特色：  
 * 划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
+* 支持浏览器：Google Chrome、Firefox、Safari（无发音）、Firefox for Android（无拖动）
 * 支持发音
-* 支持显示当前翻译引擎
 * 支持面板拖动
 * 支持面板自动调整位置
 
