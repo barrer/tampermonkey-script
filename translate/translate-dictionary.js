@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      6.3
+// @version      6.4
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -682,12 +682,16 @@
         }
         // 设置新的位置
         var iconNewTop = -1;
-        if (parseInt(icon.style.top) < scrollTop) {
+        if (parseInt(icon.style.top) < scrollTop) { // 面板在滚动条顶部可见部分之上（隐藏了部分或全部）
             log('Y adjust top');
-            iconNewTop = scrollTop;
-        } else if (parseInt(icon.style.top) + panelHeight > scrollTop + clientHeight) {
+            iconNewTop = scrollTop; // 设置为滚动条顶部可见部分位置
+        } else if (parseInt(icon.style.top) + panelHeight > scrollTop + clientHeight) { // 面板在滚动条滚到最底部时之下（隐藏了部分或全部）
             log('Y adjust bottom');
-            iconNewTop = parseInt(scrollTop + clientHeight - panelHeight);
+            iconNewTop = parseInt(scrollTop + clientHeight - panelHeight); // 设置面板底部不超过滚动条滚到最底部时可见部分位置
+            if (iconNewTop < scrollTop) { // 如果此时又出现：面板在滚动条顶部可见部分之上（隐藏了部分或全部）
+                log('Y adjust bottom top');
+                iconNewTop = scrollTop; // 设置为滚动条顶部可见部分位置
+            }
         }
         if (iconNewTop != -1 && Math.abs(iconNewTop - parseInt(icon.style.top)) <= panelHeight) {
             log('Y set iconNewTop', iconNewTop);
@@ -700,6 +704,10 @@
         } else if (parseInt(icon.style.left) + panelWidth > scrollLeft + clientWidth) {
             log('X adjust right');
             iconNewLeft = parseInt(scrollLeft + clientWidth - panelWidth);
+            if (iconNewLeft < scrollLeft) {
+                log('X adjust right left');
+                iconNewLeft = scrollLeft;
+            }
         }
         if (iconNewLeft != -1 && Math.abs(iconNewLeft - parseInt(icon.style.left)) <= panelWidth) {
             log('X set iconNewLeft', iconNewLeft);
