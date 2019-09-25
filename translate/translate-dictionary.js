@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      6.4
+// @version      6.5
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -22,6 +22,14 @@
     'use strict';
 
     // Your code here...
+    /**联网权限*/
+    // @connect      youdao.com             有道词典
+    // @connect      iciba.com              金山词霸
+    // @connect      translate.google.cn    谷歌翻译
+    // @connect      hjenglish.com          沪江小D
+    // @connect      bing.com               必应词典
+    // @connect      chinacloudapi.cn       必应词典-发音
+    // @connect      cambridge.org          剑桥高阶
     /**样式*/
     var style = document.createElement('style');
     // >>>>> 可以自定义的变量
@@ -112,7 +120,7 @@
     .cambridge .pron{color:#777;margin-right:1em}
     .cambridge b.def{font-weight:normal}
     .cambridge .epp-xref{border:1px solid #777;border-radius:.5em;padding:0 2px;font-size:80%}
-    .cambridge .examp,.cambridge .extraexamps,.cambridge .cols,.cambridge .xref,.cambridge .fcdo{display:none}
+    .cambridge .examp,.cambridge .extraexamps,.cambridge .cols,.cambridge .xref,.cambridge .fcdo,.cambridge div[fallback],.cambridge .i-volume-up,.cambridge .daccord{display:none}
     .cambridge .entry-body__el+.entry-body__el{margin-top:1em}
     .cambridge .pos-body{margin-left:1em}
     .iciba strong{font-size:1em;font-weight:normal}
@@ -1090,10 +1098,10 @@
                 .replace(/(?:<a)/ig, '<span');
             var doc = htmlToDom(rst);
             // 发音
-            doc.querySelectorAll('.audio_play_button').forEach(function (ele) {
+            doc.querySelectorAll('[type="audio/mpeg"]').forEach(function (ele) {
                 ele.appendChild(getPlayButton({
                     name: '♫',
-                    url: 'https://dictionary.cambridge.org/' + ele.getAttribute('data-src-mp3')
+                    url: 'https://dictionary.cambridge.org/' + ele.getAttribute('src')
                 }));
             });
             // 内容
