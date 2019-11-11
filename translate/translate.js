@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      6.4
+// @version      6.5
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -134,7 +134,7 @@
                         } else {
                             document.querySelector('#tta_tgtsl').value = 'zh-Hans';
                         }
-                        var source = document.querySelector('#tta_input');
+                        var source = document.querySelector('textarea');
                         source.value = text;
                         for (var i = 0; i < 10; i++) { // 最低延迟 5 秒
                             setTimeout(function () {
