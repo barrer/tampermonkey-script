@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      6.6
+// @version      6.7
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -135,7 +135,7 @@
                             document.querySelector('#tta_tgtsl').value = 'zh-Hans';
                         }
                         var source = document.querySelector('textarea');
-                        source.value = text;
+                        source.value = text + ' ←';
                     }
                 }
             },
@@ -378,7 +378,7 @@
     shadow.appendChild(icon); // 翻译图标加入 Shadow
     // 重定向前隐藏页面主体
     if (gm.get(gm.REDIRECT_URL, '') && window.location.host == 'example.com') {
-        document.documentElement.style.display = 'none';;
+        document.documentElement.style.display = 'none';
     }
     window.addEventListener('DOMContentLoaded', (e) => {
         log('DOM fully loaded and parsed');
@@ -470,8 +470,7 @@
     }
     /**弹出居中窗口*/
     function popupCenter(url, title, w, h) {
-        gm.set(gm.REDIRECT_URL, url);
-        url = 'https://example.com';
+        var transfer = 'https://example.com';
         w = w > screen.availWidth ? screen.availWidth : w;
         h = h > screen.availHeight ? screen.availHeight : h;
         var x = screen.availWidth / 2 - w / 2;
@@ -482,9 +481,11 @@
         try {
             win = window.open('', title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + y + ', left=' + x);
             win.opener = null;
-            win.location = url;
+            win.document.body.innerHTML = '<a id="redirect_url" rel="noreferrer noopener" href="' + url + '"></a>';
+            win.document.querySelector('#redirect_url').click();
         } catch (e) {
-            win = window.open(url, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + y + ', left=' + x);
+            gm.set(gm.REDIRECT_URL, url);
+            win = window.open(transfer, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + y + ', left=' + x);
             log(e);
         }
         if (window.focus) {
