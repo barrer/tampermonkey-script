@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      6.5
+// @version      6.6
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -1053,7 +1053,7 @@
                 var parent = machineTrans.parentNode;
                 var zhText = parent.querySelector('.p1-11');
                 if (zhText) {
-                    html += '<div class="machine-trans">' + zhText.outerHTML + '</div>';;
+                    html += '<div class="machine-trans">' + zhText.outerHTML + '</div>';
                 }
             }
         } catch (error) {
