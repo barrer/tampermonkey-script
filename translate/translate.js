@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      6.8
+// @version      6.9
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -17,6 +17,7 @@
     'use strict';
 
     // Your code here...
+    // 注意：自定义修改后把 “@version” 版本号改为 “10000” 防止自动更新
     /**样式*/
     var style = document.createElement('style');
     var zIndex = '2147473647'; // 渲染图层
@@ -145,7 +146,7 @@
                 image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAwFBMVEX////+VAP9WQb7aib7XRX8TQD7cy77Uwf7Zx77bzT95dT/fSH8giH+hin/gST8wZj9iSf8eRn/+fX+7OH9cRT8kz78olf+9vD/cxv8q3b//fz/eR7+cRn8x6f7dRn90K393Mb+jy/7dx7+8un8toj91br7iTv7eir9bRP7klH7aA/+aBL+ahT/dRz9ZRD+jCz+Ygz7bBD6cxv7bRX6fzb8nWX/bxj+bBb6cBn9ch36ahX7bw/+XQn8zLL6hEj7cSM2CWmfAAAAAXRSTlMAQObYZgAADLJJREFUeF68mdeW2zgQRP2MDMacg3KYHGzv/v9fLQgRopgkK3jrHM3rrUY3q0HOj1vkaTooS0qLwhUqaBgnINe8H/+HPBvE1LLSNGVsV0v8ZUK71HJpomt/l66B2DVTCW0lDWDMEEJ4ZxVJ7v01OrUEPK3VN4CVCMamG+ePp3t5rOhTBpQQQqmbaI/Fg8KUdKUTtvjhoZAV5w/Eu2kfr8Rq4RERZNL8YXim0FPtH/IJQrB6hAW9SHcDeiuGRy0QKQTN+M5w0EKTpePlY4ZreI1HpI9XgtAC91hIrF0X3ziQbNO0LFfIshbmTg4/UfRWCKLb+2CHI6fPhFKriBM91zQVzHYOSuqamEBEBuILcGP3++UL1XA6lXU2KAsTQThwgOgNbfBK85Sv6OGFtLeT2kOHDyHkVn41n6Yd1XiTAu1POle6GMKDC6hkgivbX7BO+1PGRLR5fx6cmHcNcJhc04bcYr3em7F9ZXwQYQG28uFv7wp+d/pZGgr8lQIu4h0HPvVuG3/GCv2mDE8WHJ4oi6h3df3y9JNbs8ymhKP2BHzh4OrzF+Xn9ywyk/tHvp8Z4WUHdsuXF77wvm2SuwcHvtQmuricPJedRo8J7t7mIcz8o/gsucCnp3c+NgywWyJ1tmkdGLPzA13uFF2IuZJ/twCOFH+zMapzaarL9XfkP+piqVfB0cDmpzs9BprF2vNHkv8oB4bibyLj9/QAsLZ+LPiPk46DrOZLZVNjAARXGcDWYy/2wA82SsZCm2pAO3+m/eOxSrLnSOIdJ/hJvfEG7JRYCi69HetJGYdUKi7LBOi25p3PgydlwIlm+vgTcBQrpwdVB2FhmRgRwjnkQj7nEBJcmZYbxiDXJiNu3hj4ip7evLEIbPnFeDFeXlILEyh4SrBVPeU+wYsiBKP9s6t5FDm1voL5MBDBCX98APPSrRBCpCfFVy4yHsHqLQTaEPH8+ewcNB/MoWe1BnZgrEM0RXCET2BPmfCQRcbMLJIexKNPX06jp34YJEc+G7tE6wWT6Et03z8JXd8Mu1muVXNJD4JgXmlTB4BNbXix2CGEJ/FDvlq+xmt3/QIjcAKpz+XvqQlAg/kAFpStv8iHXb5Q4BRe90kIGgMvlTZ8BJgQtvoNSDDC5NryVe46n2WnlZEh6O+1nk4L1Xfs+LIP+uscjfLJebzK/ai3fou1MrBcnFRKD3zMMOovy4RM0y/zN85X1qkoz96lPj5eXtpSNRPL8msDvQPId3ACT+Qjx3nE5S/K+nSVux0DXrGVeKFlcdJl9aUJ9SbAc+FU/ZxDItLXLYTcN8t8zfyNsdn4WQfvBL3c178a/svyVTu6QgwfhHpLAEwFDycWTfR2/3haDkBcvFV+ZERi7zmNged+7Htvq5f1h9RKjaFtKj7pZ0ABJwy4QJv8RrCYRVHgOHLv/BwsvnL58nHQXs1bcvzS1g9BOx0/AR4q/MTOKhYwMN7f5++vg1jXXpeNgbXqAVUdGDyDYOL83cuXcT2m7pv6aNsbQ2Xg+4DTLKT4/R0VjmcPB3fdjebKwP5w4LqqnyHac0vhgH+/Ae111TjYHrKoPB4AAn0DfDR4uAj42+W5W1n/er2d5bInRBlI7b4Bf9xAVt7jIF6tBV5ouQVyEysDaLCHQkjgWPByWOi3G9A/vwV9JbQPZQocO0AHi5jA8eTnGS6AdvMQbBsDMgkAw4MYVNKqEQN+rSyL/AVN7JuG4G2vDPwjDCQIKw2PteBoeu85Rla5IbjeBN2vDtrORAWhMkCqYT36KF8p86P3IKuKUr9uJsulMvABRJGo4UNr7G2Bn7lzycXnGEYwW1z1zzLw3fBXW7GPXGWAjAWsjX3oT126lJzg03h+Ve8Cl5X/2xjY/hJjJ4NYjloxGpx88tJ7Iufr2Xh6yRb0jzxos2VjYC+y1ySYSPFwdGRpdJ7u1NrUv+B9vg4qCrzLYbxXBtzaQCNYjicn5fxc9U6rIBAenp4XoX3eg7f4tZXqGiDl1GcuyKfw//Vuhd2p4kC0oIi1u8sp+JZCjcsKqKDlRCWV2gD//19tSEMgKYrPtnvfO6cf9Jx7ZzI4dxgQ2SmyY7xNjcvXBYIJA7q7W/L1Tni2atGceM4GDb0s4MPwHjfJ4uJvNar5IRFATY8kQIaZL+dPEr/M3giocEpKw+7PAEZunwAG+59fT0TC4oWb3ha3IODIsEvSsEcAhJWA5R89NcAl/L14ny7OHj8bOFpIdoHZkwHYUwMiXC9IZ9MnOQMMnL/BBiK/vwh/1bbrMbxmiY9Ws2w2J4afKph103PXCQv/3GUIKYiAiAswruqlFkCr/fSw7yo+WQBREJmdP0RMAA7ITzGzXQ/PwdUPM3hB9DzbvtbsVMBndoJNTD2HBHvEBRBf7Dwyy/HcfLUfphU6y8Wa4DXLaPwyO/MccfL5ZP0MMqihS6avWkBk/v4jLcu3bP167A5/y02HhEkCGTBpx6DOwINkSK7PxNtmtz0rYINzWUCIa/7KFnt1u3/+60ana1oAZfH2cBCPn4IZPxGGWgsofep8Gch1eBNcuqwt44PMznruxpJNKWb8ajWe2ksuwPjSYgbFdN4gElrsFLnsR3DFTqCiSjzfbz4yU3jzyBV3C4BSYFbCBRh0NKsFPP/5tSWVG7GBQxKgSgJyFVIB5L9Ha/Kx9lxz7+5LCJKTwM0E4EDKFBGAKcY0YuvhmQmYBu7XBMRy9ruOwCzxB6BaUD4zqj3f/PNOz/QACC3zyiOAmw4BEIZiteIaKgs4mHPLOZEb8HJOWs1zNXf0CwBxV/gQji3pBLgAtpf3uN+Tz8CbT/cvL/vZepetkHF5+HHBJukQkEAcCQdrl5x/YNfTT+16X1Jb+G56mFdbrren2euUtJ1VFISTbhV2iD7TQ4IkkX6KQ54ABbl1UuY8BaHw3SkzPazvr9e7dbaKnCD3JpZvu1SKaVsecNI44ewi8MoUC0Vh8WOVK/MaAUK6gp3surLj4bSN48P6WK7SZVRhuSrjilUKn+cASyU45Ccw5vOLuXxhdns+92QB3aanajbJpuo5sJ166fgJVGlD15Sg4rj8I2NK+Knhnba/H77PelyX3Hc4ePypLf8M11Bbl5z18MLmjaeF1y7CY01/wXU16OAfWXfdCVBpJ2z6yDuNX06Bt99l54KX+47ETaGmEr81bE4AiDtFvth9b1eBl+7WTfDXh8/aPfLlhqmoTQmKjWxaCxCXPLaREuN5PK7PWa6uiz/5oC+B3FrsUsFMgWJIdoILWOzEj/wcreI4PvQHz0Hpx85nh+cPKL1KMLZlmzRlAvb7TF7dVrPIYbPpFQAZP+EYdY7nZqowATQBUgrmbNzja1V5B/F2pBf69nSi7EyDHDzGSYlC/8zdFkWtgJW6DQgXQr1Zftt1+gLT8gJUZAdK1DSeVtlhCDfjIhDYRZiFQvn1Dv/rL2ZMQJbthM8lFSBAUVq+bjfNeIFJ8rdlGvU/4O9HqqIoY9AVIdjtZ2zeXC8ujwimbVleCHIjoDAACD2L7tB64YaGk1vdH/16388YDql/9//Dyta1gOwUmT9L5nYfQtN2YuT+/wJctONt5wcVmBMAvO4E+4v1jPed2PmZU7AiVdP1orsQvezYIEb2D/D7A00h0MZ+t7WNGwGHOPK/P/+FpiuKrisacs8s9Q58s3mEqffdtYc0hWFodStE8bFBcgDfW4oB51f0M8GZUUvBKUnQdx4DILln0LgAGXaUtO914FXofhu/0kAb2OcbRtxq+jFMkHUTne2bcvxtAcallpWIt5lK45aH2wfje8c/yx+5l7SjJBYdbwrs36QfUp7GlruOwH9v96zYT5ttWwGEKbj6IFxCr35AK0wWk6PpLf5h32rLBadEvNUCcelc9c6QnUdDRWVQFI8S+IXW0OuaPnF7KztMk0/3GpKib2fuh06p1/Q01oDy32vt/FNH1gsLicMm8/xpcO6WjT3J0QAzei7AoWOHkH/tyrc9XOME41iet7AKx6ljhBPLZml0TZ86xRGpO5VDoVA1UJWkLsSfX1/LUQIlAUwExnA8SouIoChGgwSrlBwLAvgvPtDb/OB3eldeYrZcaAtg9zkVRsjj5vwNHX1Sx9Bb9Z//pn1wxkSCSI8h/gy1QVPtQ8IvHIE29G64C73BkgDcJ4CR1eOhW2h1A5jc9KoKOmEssMvcMrtO6Rsya6hRFNbNr32WhOiiACycvT4Qp9NJoer6MPiCy/RBcSIsZwTIpR/l/qcY8tD68ru/RVKxnM+/opN/w8LoZbpdA0Cj6ppvqRCCH94jYLlE7I++/G44xYcKAvqHUg9HhZOLneInVVghAI6DogrICUBOHzC9Bf8BUgiQaxuANbgAAAAASUVORK5CYII=',
                 host: ['fanyi.sogou.com'],
                 popup: function (text) {
-                    popupCenter('https://fanyi.sogou.com/#auto/zh-CHS/' + encodeURIComponent(text), null, 1024, screen.height);
+                    popupCenter('https://fanyi.sogou.com/?keyword=' + encodeURIComponent(text), null, 1024, screen.height);
                 },
                 custom: function (text) {}
             },
@@ -495,13 +496,14 @@
     }
     /**打开新的标签页*/
     function openInNewTab(url) {
-        gm.set(gm.REDIRECT_URL, url);
         var a = document.createElement('a');
         a.setAttribute('target', '_blank');
-        a.setAttribute('href', 'https://example.com');
+        a.setAttribute('rel', 'noreferrer noopener');// document.referrer, window.opener
+        a.setAttribute('href', url);
         a.style.display = 'none';
         shadow.appendChild(a);
         a.click();
+        a.remove();
     }
     /**是否包含汉字*/
     function hasChineseByRange(str) {
