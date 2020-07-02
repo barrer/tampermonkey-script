@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      6.7
+// @version      6.8
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -30,13 +30,14 @@
     // @connect      bing.com               必应词典
     // @connect      chinacloudapi.cn       必应词典-发音
     // @connect      cambridge.org          剑桥高阶
+    // 注意：自定义变量修改后把 “@version” 版本号改为 “10000” 防止自动更新
+    // >---- 可以自定义的变量 -----
+    var fontSize = 14; // 字体大小[可自定义]
+    var iconWidth = 300; // 整个面板宽度[可自定义]
+    var iconHeight = 400; // 整个面板高度[可自定义]
+    // ----- 可以自定义的变量 ----<
     /**样式*/
     var style = document.createElement('style');
-    // >>>>> 可以自定义的变量
-    var fontSize = 14; // 字体大小
-    var iconWidth = 300; // 整个面板宽度
-    var iconHeight = 400; // 整个面板高度
-    // 可以自定义的变量 <<<<< （自定义变量修改后把 “@version” 版本号改为 “10000” 防止更新后消失）
     var trContentWidth = iconWidth - 16; // 整个面板宽度 - 边距间隔 = 翻译正文宽度
     var trContentHeight = iconHeight - 35; // 整个面板高度 - 边距间隔 = 翻译正文高度
     var zIndex = '2147483647'; // 渲染图层
