@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      6.9
-// @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
+// @version      7.0
+// @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、DeepL翻译、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
 // @include      https://*/*
@@ -138,6 +138,22 @@
                         var source = document.querySelector('textarea');
                         source.value = text + ' ←';
                     }
+                }
+            },
+            {
+                name: 'DeepL翻译',
+                id: 'deepl',
+                image: 'data:image/png;base64,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',
+                host: ['www.deepl.com'],
+                popup: function (text) {
+                    popupCenter('https://www.deepl.com/translator', null, 800, screen.height);
+                },
+                custom: function (text) {
+                    var source = document.querySelector('textarea');
+                    source.value = text;
+                    var event = document.createEvent("Event");
+                    event.initEvent("change", true, true);
+                    source.dispatchEvent(event);
                 }
             },
             {
@@ -498,7 +514,7 @@
     function openInNewTab(url) {
         var a = document.createElement('a');
         a.setAttribute('target', '_blank');
-        a.setAttribute('rel', 'noreferrer noopener');// document.referrer, window.opener
+        a.setAttribute('rel', 'noreferrer noopener'); // document.referrer, window.opener
         a.setAttribute('href', url);
         a.style.display = 'none';
         shadow.appendChild(a);
