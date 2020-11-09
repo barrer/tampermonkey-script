@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      7.3
+// @version      8
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、DeepL翻译、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -527,16 +527,18 @@
     /**解决 Content-Security-Policy 样式文件加载问题（Chrome 实验功能）*/
     function adoptedStyleSheets(bindDocumentOrShadowRoot, cssText) {
         try {
-            cssText = cssText.replace(/\/\*.*?\*\//ig, ''); // remove CSS comments
-            var cssSheet = new CSSStyleSheet();
-            var styleArray = cssText.split('\n');
-            for (var i = 0; i < styleArray.length; i++) {
-                var line = styleArray[i].trim();
-                if (line.length > 0) {
-                    cssSheet.insertRule(line);
+            if (bindDocumentOrShadowRoot.adoptedStyleSheets) {
+                cssText = cssText.replace(/\/\*.*?\*\//ig, ''); // remove CSS comments
+                var cssSheet = new CSSStyleSheet();
+                var styleArray = cssText.split('\n');
+                for (var i = 0; i < styleArray.length; i++) {
+                    var line = styleArray[i].trim();
+                    if (line.length > 0) {
+                        cssSheet.insertRule(line);
+                    }
                 }
+                bindDocumentOrShadowRoot.adoptedStyleSheets = [cssSheet];
             }
-            bindDocumentOrShadowRoot.adoptedStyleSheets = [cssSheet];
         } catch (error) {
             log(error);
         }
