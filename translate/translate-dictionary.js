@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      6.8
+// @version      6.9
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -379,6 +379,7 @@
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy
     shadow.appendChild(style); // 内部样式表
     shadow.appendChild(link); // 外部样式表
+    adoptedStyleSheets(shadow, style.textContent); // CSSStyleSheet 样式
     // 翻译图标加入 Shadow
     shadow.appendChild(icon);
     // 鼠标事件：防止选中的文本消失
@@ -552,6 +553,23 @@
             log(error);
         }
         return '';
+    }
+    /**解决 Content-Security-Policy 样式文件加载问题（Chrome 实验功能）*/
+    function adoptedStyleSheets(bindDocumentOrShadowRoot, cssText) {
+        try {
+            cssText = cssText.replace(/\/\*.*?\*\//ig, ''); // remove CSS comments
+            var cssSheet = new CSSStyleSheet();
+            var styleArray = cssText.split('\n');
+            for (var i = 0; i < styleArray.length; i++) {
+                var line = styleArray[i].trim();
+                if (line.length > 0) {
+                    cssSheet.insertRule(line);
+                }
+            }
+            bindDocumentOrShadowRoot.adoptedStyleSheets = [cssSheet];
+        } catch (error) {
+            log(error);
+        }
     }
     /**ajax 跨域访问公共方法*/
     function ajax(url, success, error, obj) {
