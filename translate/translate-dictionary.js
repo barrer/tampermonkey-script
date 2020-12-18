@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      8
+// @version      9
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -212,7 +212,7 @@
         engines: (function () {
             var obj = {};
             obj[ids.ICIBA] = function (text, time) {
-                ajax('https://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text), function (rst) {
+                ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text), function (rst) {
                     putEngineResult(ids.ICIBA, parseIciba(rst), time);
                     showContent();
                 }, function (rst) {
@@ -221,7 +221,7 @@
                 });
             };
             obj[ids.ICIBA_LOWER_CASE] = function (text, time) {
-                ajax('https://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text.toLowerCase()), function (rst) {
+                ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text.toLowerCase()), function (rst) {
                     putEngineResult(ids.ICIBA_LOWER_CASE, parseIciba(rst), time);
                     showContent();
                 }, function (rst) {
