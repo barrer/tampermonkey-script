@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      9
+// @version      9.0.1
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -982,7 +982,7 @@
             symbolResult.forEach(function (str) {
                 rst = rst.replace(str,
                     str.replace(/\[英\]/g, '英')
-                    .replace(/\[美\]/g, '美')
+                        .replace(/\[美\]/g, '美')
                 );
             });
             rst = cleanHtml(rst)
@@ -1070,7 +1070,7 @@
             }
             // 计算机翻译
             var machineTrans = doc.querySelector('.smt_hw');
-            if (machineTrans && machineTrans.innerHTML.indexOf('计算机翻译') != -1) {
+            if (machineTrans && (machineTrans.innerHTML.indexOf('计算机翻译') != -1 || machineTrans.innerHTML.indexOf('Machine Translation') != -1)) {
                 var parent = machineTrans.parentNode;
                 var zhText = parent.querySelector('.p1-11');
                 if (zhText) {
