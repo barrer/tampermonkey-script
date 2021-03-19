@@ -39,7 +39,7 @@ https://greasyfork.org/zh-CN/scripts/34921-translate
 可以使用更多的翻译引擎！
 
 **脚本下载地址：**  
-[https://greasyfork.org/zh-CN/users/158488-damijan](https://greasyfork.org/zh-CN/users/158488-damijan)
+[https://greasyfork.org/zh-CN/users/158488-barrer](https://greasyfork.org/zh-CN/users/158488-barrer)
 
 **使用前：**  
 [https://tampermonkey.net/](https://tampermonkey.net/)  
