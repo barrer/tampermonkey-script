@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.1
+// @version      10.2
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -45,28 +45,26 @@
     :host{all:unset!important}
     :host{all:initial!important}
     *{word-wrap:break-word!important;word-break:break-word!important}
-    a{color:#00c;text-decoration:none;cursor:pointer}
+    a{color:#326891;text-decoration:none;cursor:pointer}
     a:hover{text-decoration:none}
-    a:active{text-decoration:underline}
+    a:active{text-decoration:none}
     img{cursor:pointer;display:inline-block;width:20px;height:20px;border:1px solid #dfe1e5;border-radius:4px;background-color:rgba(255,255,255,1);padding:2px;margin:0;margin-right:5px;box-sizing:content-box;vertical-align:middle}
     img:last-of-type{margin-right:auto}
-    img:hover{border:1px solid #f90}
-    img[activate]{border:1px solid #f90}
-    img[activate]:hover{border:1px solid #f90}
-    table{font-size:inherit;color:inherit}
-    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;box-sizing:content-box;font-size:${fontSize}px;text-align:left;border:0;border-radius:4px;color:black;z-index:${zIndex};background:transparent}
-    tr-icon[activate]{background:#fff;-webkit-box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08);box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08)}
+    img:hover{border:1px solid #ff9900}
+    img[activate]{border:1px solid #ff9900}
+    img[activate]:hover{border:1px solid #ff9900}
+    tr-icon{display:none;position:absolute;padding:0;margin:0;cursor:move;box-sizing:content-box;font-size:${fontSize}px;text-align:left;border:0;border-radius:4px;z-index:${zIndex};background:transparent}
+    tr-icon[activate]{color:#121212;background:#ffffff;-webkit-box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08);box-shadow:0 3px 8px 0 rgba(0,0,0,0.2),0 0 0 0 rgba(0,0,0,0.08)}
     tr-audio{display:block;margin-bottom:5px}
     tr-audio a{margin-right:1em;font-size:80%}
     tr-audio a:last-of-type{margin-right:auto}
-    tr-content{display:none;width:${trContentWidth}px;height:${trContentHeight}px;overflow-x:hidden;overflow-y:scroll;background:white;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Arial","sans-serif";font-size:${fontSize}px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
+    tr-content{display:none;width:${trContentWidth}px;height:${trContentHeight}px;overflow-x:hidden;overflow-y:scroll;padding:2px 8px;margin-top:5px;box-sizing:content-box;font-family:"Helvetica Neue","Helvetica","Microsoft Yahei","微软雅黑","Arial","sans-serif";font-size:${fontSize}px;font-weight:normal;line-height:normal;-webkit-font-smoothing:auto;font-smoothing:auto;text-rendering:auto}
     tr-engine~tr-engine{margin-top:1em}
-    tr-engine .title{color:#00c;display:inline-block;font-weight:bold}
-    tr-engine .title:hover{text-decoration:none}
+    tr-engine .title{color:#121212;display:inline-block;font-size:110%;font-weight:bold}
     /*各引擎样式*/
     .google .sentences,.google .trans,.google .orig,.google .dict,.google .pos,.none{display:block}
     .google .backend,.google .entry,.google .base_form,.google .pos_enum,.google .src,.google .confidence,.google .ld_result,.google .translation_engine_debug_info,.none{display:none}
-    .google .orig{color:#777}
+    .google .orig{color:#808080}
     .google .pos{margin-top:1em}
     .google .pos:before{content:"<"}
     .google .pos:after{content:">"}
@@ -74,7 +72,7 @@
     .google .terms:after{content:"〕"}
     .google .terms{margin-right:.2em}
     .youdao .pron{margin-right:1em}
-    .youdao .phone{color:#777;margin-right:1em}
+    .youdao .phone{color:#808080;margin-right:1em}
     .youdao .phone:before{content:"["}
     .youdao .phone:after{content:"]"}
     .youdao .pos:before{content:"<"}
@@ -83,51 +81,55 @@
     .youdao .trs>.tr>.exam{display:none}
     .youdao .trs>.tr>.l{display:block;margin-left:1em}
     .youdao [class="#text"]{font-style:italic}
-    .youdao .return-phrase,.youdao [class="@action"],.none{display:none}
+    .youdao [class="@action"],.none{display:none}
     .hjenglish dl,.hjenglish dt,.hjenglish dd,.hjenglish p,.hjenglish ul,.hjenglish li,.hjenglish h3{margin:0;padding:0;margin-block-start:0;margin-block-end:0;margin-inline-start:0;margin-inline-end:0}
     .hjenglish h3{font-size:1em;font-weight:normal}
-    .hjenglish .detail-pron,.hjenglish .pronounces{color:#777}
+    .hjenglish .detail-pron,.hjenglish .pronounces{color:#808080}
     .hjenglish ul{margin-left:2em}
     .hjenglish .def-sentence-from,.hjenglish .def-sentence-to{display:none}
     .hjenglish .detail-groups dd h3:before{counter-increment:eq;content:counter(eq) ".";display:block;width:22px;float:left}
+    .hjenglish .detail-groups dd:first-of-type:last-of-type h3:before{content:""}
     .hjenglish .detail-groups dl{counter-reset:eq;margin-bottom:.5em;clear:both}
     .hjenglish ol,.hjenglish ul{list-style:none}
     .hjenglish dd{margin-left:1em}
-    .hjenglish dd>p{margin-left:2.5em}
-    .bing h1,.bing strong{font-size:1em;font-weight:normal;margin:0;padding:0}
+    .hjenglish dd>p{display:none}
+    .bing h1,.bing strong,.bing td{font-size:1em;font-weight:normal;margin:0;padding:0}
     .bing .concise ul{list-style:none;margin:0;padding:0}
     .bing .hd_tf{margin-right:1em}
     .bing .concise .pos{margin-right:.2em}
     .bing .concise .web{margin-right:auto}
     .bing .concise .web:after{content:"："}
     .bing .oald{margin-top:.4em}
-    .bing .hd_tf_lh div{display:inline;color:#777}
-    .bing #authid td:first-child{width:22px;margin:0;padding:0}
+    .bing .hd_tf_lh div{display:inline;color:#808080}
     .bing .def_row{vertical-align:top}
+    .bing .se_d{display:inline;margin-right:.25em}
+    .bing #authid .only .se_d{display:none}
     .bing .bil_dis,.bing .val_dis{padding-right:.25em}
-    .bing .li_exs{display:none}
+    .bing .li_sens div{display:inline}
+    .bing .li_sens div.li_exs,.bing .li_exs{display:none}
     .bing .li_id{border:0;padding:.2em}
     .bing .infor,.bing .sen_com,.bing .com_sep,.bing .bil,.bing .gra{padding-right:.25em}
     .bing .infor,.bing .label{padding-left:.25em}
     .bing .each_seg+.each_seg{margin-top:.5em}
-    .bing .de_co div{display:inline}
+    .bing .de_co,.bing .de_co div{display:inline}
     .bing .idm_seg,.bing .li_ids_co{margin-left:1em}
     .bing .sim{display:inline}
+    .bing .val{display:none}
     .cambridge .entry~.entry{margin-top:1em}
     .cambridge p,.cambridge h2,.cambridge h3{padding:0;margin:0}
     .cambridge h2,.cambridge h3{font-size:1em;font-weight:normal}
     .cambridge .headword .hw{display:block}
-    .cambridge .pron{color:#777;margin-right:1em}
+    .cambridge .pron{color:#808080;margin-right:1em}
     .cambridge b.def{font-weight:normal}
-    .cambridge .epp-xref{border:1px solid #777;border-radius:.5em;padding:0 2px;font-size:80%}
     .cambridge .examp,.cambridge .extraexamps,.cambridge .cols,.cambridge .xref,.cambridge .fcdo,.cambridge div[fallback],.cambridge .i-volume-up,.cambridge .daccord{display:none}
     .cambridge .entry-body__el+.entry-body__el{margin-top:1em}
-    .cambridge .pos-body{margin-left:1em}
-    .iciba strong{font-size:1em;font-weight:normal}
-    .iciba p{padding:0;margin:0}
-    .iciba .icIBahyI-footer,.iciba .icIBahyI-suggest{display:none}
-    .iciba .icIBahyI-prons{color:#777}
-    .iciba .icIBahyI-eg{margin-right:1em}
+    .cambridge .epp-xref,.cambridge .db,.cambridge .bb{display:none}
+    .iciba h1,.iciba p{margin:0;padding:0;font-size:1em;font-weight:normal}
+    .iciba ul{list-style:none;margin:0;padding:0}
+    .iciba li>i{font-style:normal}
+    .iciba ul[class^="Mean_symbols"] li{display:inline;color:#808080;margin-right:1em}
+    .iciba ul[class^="Mean_part"] li>i{margin-right:0.2em}
+    .iciba ul[class^="Mean_part"] li>div{display:inline}
     `;
     // iframe 工具库
     var iframe = document.createElement('iframe');
@@ -148,7 +150,7 @@
     // 发音缓存
     var audioCache = {}; // {'mp3 download url': data}
     // 翻译引擎结果集
-    var engineResult = {}; // id: DOM 
+    var engineResult = {}; // id: DOM
     // 唯一 ID
     var ids = {
         ICIBA: 'iciba',
@@ -211,7 +213,7 @@
         engines: (function () {
             var obj = {};
             obj[ids.ICIBA] = function (text, time) {
-                ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text), function (rst) {
+                ajax('https://www.iciba.com/word?w=' + encodeURIComponent(text), function (rst) {
                     putEngineResult(ids.ICIBA, parseIciba(rst), time);
                     showContent();
                 }, function (rst) {
@@ -220,7 +222,7 @@
                 });
             };
             obj[ids.ICIBA_LOWER_CASE] = function (text, time) {
-                ajax('http://open.iciba.com/huaci_v3/dict.php?word=' + encodeURIComponent(text.toLowerCase()), function (rst) {
+                ajax('https://www.iciba.com/word?w=' + encodeURIComponent(text.toLowerCase()), function (rst) {
                     putEngineResult(ids.ICIBA_LOWER_CASE, parseIciba(rst), time);
                     showContent();
                 }, function (rst) {
@@ -255,7 +257,7 @@
                     showContent();
                 }, {
                     headers: {
-                        'Cookie': 'ENSEARCH=BENVER=0;' // 中文结果
+                        'Accept-Language': 'zh-CN,zh;q=0.9'
                     }
                 });
             };
@@ -269,7 +271,7 @@
                 }, {
                     headers: {
                         'Cookie': 'HJ_SID=' + uuid() + '; HJ_SSID_3=' + uuid() + '; HJ_CST=1; HJ_CSST_3=1; HJ_UID=' + uuid(),
-                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'
+                        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 Safari/605.1.15'
                     }
                 });
             };
@@ -521,28 +523,98 @@
         return xml.replace(/<([^/]+?)>/g, '<' + tag + ' class="$1">')
             .replace(/<\/(.+?)>/g, '</' + tag + '>');
     }
-    // html 字符串转 DOM
+    /**html 字符串转 DOM*/
     function htmlToDom(html) {
         var div = document.createElement('div');
         div.innerHTML = html;
         return div;
     }
+    /**替换html标签
+     * @param tag 匹配的时候不区分大小写
+    */
+    function replaceHtmlTag(str, tag, newTag) {
+        if (true) { // 开始标签
+            let newStr = '';
+            let index = 0;
+            let matches = str.matchAll(/<(((?![<\/>])[\S])+)(((?![<>])[\S\s])*)>/g);
+            for (const match of matches) {
+                if (tag.toLowerCase() !== match[1].toLowerCase()) continue;
+                newStr += str.substring(index, match.index);
+                newStr += match[3] ? '<' + newTag + match[3] + '>' : '<' + newTag + '>';
+                index = match.index + match[0].length;
+            }
+            newStr += str.substring(index, str.length);
+            str = newStr;
+        }
+        if (true) { // 结束标签
+            let newStr = '';
+            let index = 0;
+            let matches = str.matchAll(/<\/(((?![<>])[\S])+)(((?![<>])[\S\s])*)>/g);
+            for (const match of matches) {
+                if (tag.toLowerCase() !== match[1].toLowerCase()) continue;
+                newStr += str.substring(index, match.index);
+                newStr += '</' + newTag + '>';
+                index = match.index + match[0].length;
+            }
+            newStr += str.substring(index, str.length);
+            str = newStr;
+        }
+        return str;
+    }
     /**清理 html*/
     function cleanHtml(html) {
         html = html.replace(/<script[\s\S]*?<\/script>/ig, '')
+            .replace(/<meta[\s\S]*?>/ig, '')
+            .replace(/<title[\s\S]*?<\/title>/ig, '')
+            .replace(/<head[\s\S]*?<\/head>/ig, '')
             .replace(/<link[\s\S]*?>/ig, '')
             .replace(/<style[\s\S]*?<\/style>/ig, '')
+            .replace(/<audio[\s\S]*?<\/audio>/ig, '')
+            .replace(/<video[\s\S]*?<\/video>/ig, '')
+            .replace(/<iframe[\s\S]*?<\/iframe>/ig, '')
             .replace(/<img[\s\S]*?>/ig, '');
-        html = cleanAttr(html, 'on[a-z]*');
+        html = cleanAttr(html, /on[a-z]*/ig);
         return html;
     }
     /**
      * 清理指定属性（忽略大小写）
-     * @param attr 支持正则表示（如“on[a-z]*”，表示清理“on”开头的属性：onclick、onmove等）
+     * @param rmAttrKey 正则表达式
      */
-    function cleanAttr(html, attr) {
-        var regex = ' ' + attr + '="([^"<>]*)"';
-        return html.replace(new RegExp(regex, 'ig'), '');
+    function cleanAttr(html, rmAttrKey) {// @param rmAttrKey 如“/on[a-z]*/ig”，表示清理“on”、“ON”开头的属性：onclick、onmove等
+        let str = html;
+        // 开始标签中的属性
+        let newStr = '';
+        let index = 0;
+        let matches = str.matchAll(/<(((?![<\/>])[\S])+)(((?![<>])[\S\s])*)>/g);
+        let i = 0;
+        for (const match of matches) {
+            // 属性匹配
+            let attrStr = match[0];
+            let attrNewStr = '';
+            let attrIndex = 0;
+            let attrMs = attrStr
+                .matchAll( // 此正则会匹配“key=value”[1]这种形式，属性中仅有单“key”[2]不匹配，属性中混合[1][2]仅匹配[1]且[2]会算作其之前邻近[1]的value
+                    /([\s][a-zA-Z0-9-]+(((?![=<>])[\s])*))=(((?!([\s][a-zA-Z0-9-]+(((?![=<>])[\s])*))=)(?![<>])[\s\S])*)/g
+                )
+            for (const am of attrMs) {
+                let key = am[1].trim();
+                let value = am[4].trim();
+                if (rmAttrKey.test(key)) {
+                    attrNewStr += attrStr.substring(attrIndex, am.index);
+                    attrIndex = am.index + am[0].length;
+                }
+            }
+            attrNewStr += attrStr.substring(attrIndex, attrStr.length);
+            attrStr = attrNewStr;
+            // 删减属性后更新标签
+            if (match[0] === attrStr) continue; // 无删减属性
+            newStr += str.substring(index, match.index);
+            newStr += attrStr;
+            index = match.index + match[0].length;
+        }
+        newStr += str.substring(index, str.length);
+        str = newStr;
+        return str;
     }
     /**带异常处理的 createObjectURL*/
     function createObjectURLWithTry(blob) {
@@ -580,19 +652,19 @@
         if (!!!obj.method) {
             obj.method = 'GET';
         }
-        // >>>因为Tampermonkey跨域访问(a.com)时会自动携带对应域名(a.com)的对应cookie
-        // 不会携带当前域名的cookie
-        // 所以，GM_xmlhttpRequest【不存在】cookie跨域访问安全性问题
-        // 以下设置的cookie会添加到已有cookie的后面<<<
         if (!!!obj.headers) {
-            obj.headers = {
-                'cookie': ''
-            };
+            obj.headers = {};
+        }
+        // Tampermonkey（其它浏览器扩展同理）代理跨域访问（a.com）时会自动携带对应域名（a.com）的对应cookie，
+        // 不会携带当前域名的cookie，GM_xmlhttpRequest【不存在】cookie跨域访问安全性问题。
+        if (!!!obj.anonymous) {
+            obj.anonymous = true;// 默认不发送cookie
         }
         GM_xmlhttpRequest({
             method: obj.method,
             url: url,
             headers: obj.headers,
+            anonymous: obj.anonymous,
             responseType: obj.responseType,
             data: obj.data,
             onload: function (res) {
@@ -882,7 +954,7 @@
         var html = '';
         try {
             var rstJson = iframeWin.JSON.parse(rst),
-                phoneStyle = 'color:#777;';
+                phoneStyle = 'color:#808080;';
             if (rstJson.ec) {
                 var word = rstJson.ec.word[0],
                     tr = '';
@@ -936,8 +1008,27 @@
             }
             // 中英翻译
             if (rstJson.ce_new && rstJson.ce_new.word) {
+                var arr = new iframeWin.Array();
+                rstJson.ce_new.word.forEach(d => {
+                    if (d.phone) {
+                        var obj = new iframeWin.Object();
+                        obj['phone'] = d.phone;
+                        arr.push(objToXml(obj));
+                    }
+                    if (d['return-phrase']) {
+                        var obj = new iframeWin.Object();
+                        obj['return-phrase'] = d['return-phrase'];
+                        arr.push(objToXml(obj));
+                    }
+                    if (d.trs) {
+                        var obj = new iframeWin.Object();
+                        obj['trs'] = d.trs;
+                        arr.push(objToXml(obj));
+                    }
+                });
                 html += '<div>' +
-                    '《新汉英大辞典》<br>' + xmlToHtml(objToXml(rstJson.ce_new.word), 'div') +
+                    '《' + (rstJson.ce_new.source && rstJson.ce_new.source.name ? rstJson.ce_new.source.name : '') + '》<br>'
+                    + xmlToHtml(objToXml(arr), 'div') +
                     '</div>';
             }
             // 中文翻译
@@ -961,47 +1052,20 @@
     }
     /**金山词霸排版*/
     function parseIciba(rst) {
-        var dom = document.createElement('div');
+        let dom = document.createElement('div');
         dom.setAttribute('class', ids.ICIBA);
         try {
-            rst = rst.replace(/\n/g, ' ');
-            rst = /dict.innerHTML='(.*)';    \tdict.style.display = "block";/g.exec(rst)[1];
-            rst = rst
-                .replace(/\\"/g, '"')
-                .replace(/\\'/g, '\'') // inner-city 这个词会多一个斜杠，金山词霸的数据有些许瑕疵
-                .replace(/onclick=/g, 'data-onclick=');
-            rst = cleanAttr(rst, 'style');
-            // 标识符处理
-            var symbolRegex = /(<span class="icIBahyI-fl">.*?(?: xml:lang=).*?<\/span>)/ig;
-            var symbolMatch;
-            var symbolResult = [];
-            while ((symbolMatch = symbolRegex.exec(rst)) != null) {
-                symbolResult.push(symbolMatch[1]);
-            }
-            symbolResult.forEach(function (str) {
-                rst = rst.replace(str,
-                    str.replace(/\[英\]/g, '英')
-                        .replace(/\[美\]/g, '美')
-                );
+            let doc = htmlToDom(cleanHtml(rst));
+            let mean = doc.querySelector('div[class^="Mean_mean"]');
+            mean.querySelectorAll('ul[class^="Mean_symbols"] li').forEach(el => {
+                el.innerHTML = el.innerHTML.replace(/英/g, '英 ').replace(/美/g, '美 ');
             });
-            rst = cleanHtml(rst)
-                .replace(/(?:a>)/ig, 'span>')
-                .replace(/(?:<a)/ig, '<span');
-            var doc = htmlToDom(rst);
-            // 发音
-            doc.querySelectorAll('[title="真人发音"],[title="机器发音"]').forEach(function (ele) {
-                var str = ele.getAttribute('data-onclick');
-                var regex = /'(http:\/\/.*?)'/ig;
-                var match = regex.exec(str);
-                if (match && match.length >= 1) {
-                    ele.appendChild(getPlayButton({
-                        name: '♫',
-                        url: match[1]
-                    }));
-                }
-            });
-            // 内容
-            dom.appendChild(doc);
+            let mt = mean.querySelector('p[class^="Mean_desc"]')
+                && mean.querySelector('p[class^="Mean_desc"]').innerHTML.indexOf('以上结果来自机器翻译。') != -1
+                ? ',p[class^="Mean_desc"],h2[class^="Mean_sentence"]' : '';
+            mean.querySelectorAll(`p[class^="Mean_tag"],p[class^="Mean_else"],ul[class^="TabList_tab"],h3[class^="Mean_title"]${mt}`).forEach(el => el.remove());
+            mean.innerHTML = mean.innerHTML.replace(/<li><\/li>/g, '');// GNU、MODE
+            dom.appendChild(mean);
         } catch (error) {
             log(error);
             dom.appendChild(htmlToDom(error));
@@ -1041,20 +1105,20 @@
     }
     /**必应词典排版*/
     function parseBing(rst) {
-        var html = '';
+        let html = '';
         try {
             rst = rst.replace(/onmouseover/ig, 'data-sound'); // 发音链接预处理
             rst = cleanHtml(rst)
                 .replace(/(?:a>)/ig, 'span>')
                 .replace(/(?:<a)/ig, '<span');
-            var doc = htmlToDom(rst);
+            let doc = htmlToDom(rst);
             doc.querySelectorAll('.hw_ti').forEach(function (ele) { // 牛津词头（不准）
                 ele.remove();
             });
-            var entry = doc.querySelector('.qdef .hd_area');
-            var concise = doc.querySelector('.qdef ul');
-            var tense = doc.querySelector('.qdef .hd_div1');
-            var oald = doc.querySelector('#authid');
+            let entry = doc.querySelector('.qdef .hd_area');
+            let concise = doc.querySelector('.qdef ul');
+            let tense = doc.querySelector('.qdef .hd_div1');
+            let oald = doc.querySelector('#authid');
             if (entry) {
                 html += '<div class="entry">' + entry.innerHTML + '</div>';
                 if (concise) {
@@ -1064,14 +1128,25 @@
                     html += '<div class="tense">' + tense.outerHTML + '</div>';
                 }
                 if (oald) {
-                    html += '<div class="oald">《牛津高阶英汉双解词典第八版》<br>' + oald.outerHTML + '</div>';
+                    // 单条释义不显示序号
+                    oald.querySelectorAll('.se_lis').forEach(el => {
+                        if (el.parentElement.querySelectorAll('.se_lis').length == 1) {
+                            el.classList.add('only');
+                        }
+                    });
+                    let oaldHtml = oald.outerHTML;
+                    oaldHtml = replaceHtmlTag(oaldHtml, 'table', 'div');
+                    oaldHtml = replaceHtmlTag(oaldHtml, 'tbody', 'div');
+                    oaldHtml = replaceHtmlTag(oaldHtml, 'tr', 'div');
+                    oaldHtml = replaceHtmlTag(oaldHtml, 'td', 'span');
+                    html += '<div class="oald">《牛津高阶英汉双解词典第八版》<br>' + oaldHtml + '</div>';
                 }
             }
             // 计算机翻译
-            var machineTrans = doc.querySelector('.smt_hw');
+            let machineTrans = doc.querySelector('.smt_hw');
             if (machineTrans && (machineTrans.innerHTML.indexOf('计算机翻译') != -1 || machineTrans.innerHTML.indexOf('Machine Translation') != -1)) {
-                var parent = machineTrans.parentNode;
-                var zhText = parent.querySelector('.p1-11');
+                let parent = machineTrans.parentNode;
+                let zhText = parent.querySelector('.p1-11');
                 if (zhText) {
                     html += '<div class="machine-trans">' + zhText.outerHTML + '</div>';
                 }
@@ -1080,14 +1155,14 @@
             log(error);
             html += error;
         }
-        var dom = document.createElement('div');
+        let dom = document.createElement('div');
         dom.setAttribute('class', ids.BING);
         dom.innerHTML = html;
         // 发音
         dom.querySelectorAll('[data-sound]').forEach(function (ele) {
-            var str = ele.getAttribute('data-sound');
-            var regex = /'(https:\/\/.*?)'/ig;
-            var match = regex.exec(str);
+            let str = ele.getAttribute('data-sound');
+            let regex = /'(https:\/\/.*?)'/ig;
+            let match = regex.exec(str);
             if (match && match.length >= 1) {
                 ele.appendChild(getPlayButton({
                     name: '♫',
