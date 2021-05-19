@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      10.3
+// @version      10.4
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、DeepL翻译、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -551,6 +551,8 @@
         this.mouseDownPositionY = 0;
         this.elementOriginalLeft = parseInt(element.style.left);
         this.elementOriginalTop = parseInt(element.style.top);
+        this.backAndForthLeftMax = 0;
+        this.backAndForthTopMax = 0;
         const ref = this;
         this.startDrag = e => {
             e.preventDefault();
@@ -560,6 +562,8 @@
             ref.mouseDownPositionY = e.clientY;
             ref.elementOriginalLeft = parseInt(element.style.left);
             ref.elementOriginalTop = parseInt(element.style.top);
+            ref.backAndForthLeftMax = 0;
+            ref.backAndForthTopMax = 0;
             // set mousemove event
             window.addEventListener('mousemove', ref.dragElement);
             window.addEventListener('mouseup', ref.stopDrag);
@@ -586,6 +590,10 @@
             // move element
             element.style.left = `${ref.elementOriginalLeft + (e.clientX - ref.mouseDownPositionX)}px`;
             element.style.top = `${ref.elementOriginalTop + (e.clientY - ref.mouseDownPositionY)}px`;
+            let left = Math.abs(ref.elementOriginalLeft - parseInt(element.style.left));
+            let top = Math.abs(ref.elementOriginalTop - parseInt(element.style.top));
+            if (left > ref.backAndForthLeftMax) ref.backAndForthLeftMax = left;
+            if (top > ref.backAndForthTopMax) ref.backAndForthTopMax = top;
             log('dragElement');
         };
         element.onmousedown = this.startDrag;
@@ -599,7 +607,9 @@
         return (iconDrag.elementOriginalLeft != parseInt(icon.style.left)
             && Math.abs(iconDrag.elementOriginalLeft - parseInt(icon.style.left)) >= fluctuate) ||
             (iconDrag.elementOriginalTop != parseInt(icon.style.top)
-                && Math.abs(iconDrag.elementOriginalTop - parseInt(icon.style.top)) >= fluctuate);
+                && Math.abs(iconDrag.elementOriginalTop - parseInt(icon.style.top)) >= fluctuate) ||
+            iconDrag.backAndForthLeftMax >= fluctuate ||
+            iconDrag.backAndForthTopMax >= fluctuate;
     }
     /**强制结束拖动*/
     function forceStopDrag() {
