@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.4
+// @version      10.5
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -122,7 +122,10 @@
     .cambridge b.def{font-weight:normal}
     .cambridge .examp,.cambridge .extraexamps,.cambridge .cols,.cambridge .xref,.cambridge .fcdo,.cambridge div[fallback],.cambridge .i-volume-up,.cambridge .daccord{display:none}
     .cambridge .entry-body__el+.entry-body__el{margin-top:1em}
-    .cambridge .epp-xref,.cambridge .db,.cambridge .bb{display:none}
+    .cambridge .epp-xref,.cambridge .db,.cambridge .bb,.cambridge .i-caret-right,.cambridge .dsense_h{display:none}
+    .cambridge .dphrase-block{margin-left:1em}
+    .cambridge .dphrase-title b{font-weight:normal}
+    .cambridge .ddef_h,.cambridge .def-body{display:inline}
     .iciba h1,.iciba p{margin:0;padding:0;font-size:1em;font-weight:normal}
     .iciba ul{list-style:none;margin:0;padding:0}
     .iciba li>i{font-style:normal}
@@ -441,13 +444,13 @@
             ref.elementOriginalTop = parseInt(element.style.top);
             ref.backAndForthLeftMax = 0;
             ref.backAndForthTopMax = 0;
-            // set mousemove event
+            // set global mouse events
             window.addEventListener('mousemove', ref.dragElement);
             window.addEventListener('mouseup', ref.stopDrag);
             log('startDrag');
         };
         this.unsetMouseMove = () => {
-            // unset mousemove event
+            // unset global mouse events
             window.removeEventListener('mousemove', ref.dragElement);
             window.removeEventListener('mouseup', ref.stopDrag);
         };
@@ -467,6 +470,7 @@
             // move element
             element.style.left = `${ref.elementOriginalLeft + (e.clientX - ref.mouseDownPositionX)}px`;
             element.style.top = `${ref.elementOriginalTop + (e.clientY - ref.mouseDownPositionY)}px`;
+            // get max move
             let left = Math.abs(ref.elementOriginalLeft - parseInt(element.style.left));
             let top = Math.abs(ref.elementOriginalTop - parseInt(element.style.top));
             if (left > ref.backAndForthLeftMax) ref.backAndForthLeftMax = left;

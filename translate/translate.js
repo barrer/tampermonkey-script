@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      10.4
+// @version      10.5
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、DeepL翻译、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -564,13 +564,13 @@
             ref.elementOriginalTop = parseInt(element.style.top);
             ref.backAndForthLeftMax = 0;
             ref.backAndForthTopMax = 0;
-            // set mousemove event
+            // set global mouse events
             window.addEventListener('mousemove', ref.dragElement);
             window.addEventListener('mouseup', ref.stopDrag);
             log('startDrag');
         };
         this.unsetMouseMove = () => {
-            // unset mousemove event
+            // unset global mouse events
             window.removeEventListener('mousemove', ref.dragElement);
             window.removeEventListener('mouseup', ref.stopDrag);
         };
@@ -590,6 +590,7 @@
             // move element
             element.style.left = `${ref.elementOriginalLeft + (e.clientX - ref.mouseDownPositionX)}px`;
             element.style.top = `${ref.elementOriginalTop + (e.clientY - ref.mouseDownPositionY)}px`;
+            // get max move
             let left = Math.abs(ref.elementOriginalLeft - parseInt(element.style.left));
             let top = Math.abs(ref.elementOriginalTop - parseInt(element.style.top));
             if (left > ref.backAndForthLeftMax) ref.backAndForthLeftMax = left;
