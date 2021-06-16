@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.5
+// @version      10.6
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @match        http://*/*
@@ -1073,15 +1073,17 @@
         try {
             let doc = htmlToDom(cleanHtml(rst));
             let mean = doc.querySelector('div[class^="Mean_mean"]');
-            mean.querySelectorAll('ul[class^="Mean_symbols"] li').forEach(el => {
-                el.innerHTML = el.innerHTML.replace(/英/g, '英 ').replace(/美/g, '美 ');
-            });
-            let mt = mean.querySelector('p[class^="Mean_desc"]')
-                && mean.querySelector('p[class^="Mean_desc"]').innerHTML.includes('以上结果来自机器翻译。')
-                ? ',p[class^="Mean_desc"],h2[class^="Mean_sentence"]' : '';
-            mean.querySelectorAll(`p[class^="Mean_tag"],p[class^="Mean_else"],ul[class^="TabList_tab"],h3[class^="Mean_title"]${mt}`).forEach(el => el.remove());
-            mean.innerHTML = mean.innerHTML.replace(/<li><\/li>/g, '');// GNU、MODE
-            dom.appendChild(mean);
+            if (mean) {
+                mean.querySelectorAll('ul[class^="Mean_symbols"] li').forEach(el => {
+                    el.innerHTML = el.innerHTML.replace(/英/g, '英 ').replace(/美/g, '美 ');
+                });
+                let mt = mean.querySelector('p[class^="Mean_desc"]')
+                    && mean.querySelector('p[class^="Mean_desc"]').innerHTML.includes('以上结果来自机器翻译。')
+                    ? ',p[class^="Mean_desc"],h2[class^="Mean_sentence"]' : '';
+                mean.querySelectorAll(`p[class^="Mean_tag"],p[class^="Mean_else"],ul[class^="TabList_tab"],h3[class^="Mean_title"]${mt}`).forEach(el => el.remove());
+                mean.innerHTML = mean.innerHTML.replace(/<li><\/li>/g, '');// GNU、MODE
+                dom.appendChild(mean);
+            }
         } catch (error) {
             log(error);
             dom.appendChild(htmlToDom(error));
