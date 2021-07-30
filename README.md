@@ -24,14 +24,14 @@ Just add it to the JSON array `iconArray`.
 
 ```javascript
 {
-     name: 'Site name',
-     id: 'Unique ID (combination of upper and lower case letters)',
-     image: 'Convert image to Base64',
-     host: ['example.com', 'dict.example.com', 'more.example.com'],
-     popup(text) {
-         popupCenter(`https://dict.example.com/search=${encodeURIComponent(text)}`, null, 800, screen.height);
-     },
-     custom(text) { /*JavaScript code that is executed after the above domains page is loaded.*/ }
+    name: 'Site name',
+    id: 'Unique ID (combination of upper and lower case letters)',
+    image: 'Convert image to Base64',
+    host: ['example.com', 'dict.example.com', 'more.example.com'],
+    popup(text) {
+        popupCenter(`https://dict.example.com/search=${encodeURIComponent(text)}`, null, 800, screen.height);
+    },
+    custom(text) { /*JavaScript code that is executed after the above domains page is loaded.*/ }
 }
 ```
 
