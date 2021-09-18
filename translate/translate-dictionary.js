@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.10
+// @version      10.11
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -10,7 +10,7 @@
 // @include      file:///*
 // @connect      youdao.com
 // @connect      iciba.com
-// @connect      translate.google.cn
+// @connect      translate.google.com
 // @connect      hjenglish.com
 // @connect      bing.com
 // @connect      chinacloudapi.cn
@@ -41,7 +41,7 @@
     /**联网权限*/
     // @connect      youdao.com             有道词典
     // @connect      iciba.com              金山词霸
-    // @connect      translate.google.cn    谷歌翻译
+    // @connect      translate.google.com   谷歌翻译
     // @connect      hjenglish.com          沪江小D
     // @connect      bing.com               必应词典
     // @connect      chinacloudapi.cn       必应词典-发音
@@ -219,9 +219,9 @@
             obj[ids.GOOGLE] = text => {
                 let rst = '';
                 if (hasChineseByRange(text)) {
-                    rst = `https://translate.google.cn/#view=home&op=translate&sl=auto&tl=en&text=${encodeURIComponent(text)}`;
+                    rst = `https://translate.google.com/#view=home&op=translate&sl=auto&tl=en&text=${encodeURIComponent(text)}`;
                 } else {
-                    rst = `https://translate.google.cn/#view=home&op=translate&sl=auto&tl=zh-CN&text=${encodeURIComponent(text)}`;
+                    rst = `https://translate.google.com/#view=home&op=translate&sl=auto&tl=zh-CN&text=${encodeURIComponent(text)}`;
                 }
                 return rst;
             };
@@ -295,7 +295,7 @@
                 });
             };
             obj[ids.GOOGLE] = (text, time) => {
-                let url = 'https://translate.google.cn/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&hl=zh-CN&sl=auto';
+                let url = 'https://translate.google.com/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&hl=zh-CN&sl=auto';
                 url += `&tk=${token(text)}`;
                 if (hasChineseByRange(text)) {
                     url += `&tl=en&q=${encodeURIComponent(text)}`;
