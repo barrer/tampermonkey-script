@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      10.8
+// @version      10.9
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、DeepL翻译、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -503,6 +503,7 @@
     /**弹出居中窗口*/
     function popupCenter(url, title, w, h) {
         const transfer = 'https://example.com';
+        title = isNotNull(title) ? title : '_blank';// 留空默认“_self”，会复用当前弹出窗口
         w = w > screen.availWidth ? screen.availWidth : w;
         h = h > screen.availHeight ? screen.availHeight : h;
         let x = screen.availWidth / 2 - w / 2;
@@ -517,7 +518,7 @@
             win.document.querySelector('#redirect_url').click();
         } catch (e) {
             gm.set(gm.REDIRECT_URL, url);
-            win = window.open(transfer, title, `scrollbars=yes, width=${w}, height=${h}, top=${y}, left=${x}`);
+            win = window.open(transfer, title, `scrollbars=yes, width=${w}, height=${h}, top=${y}, left=${x}, noopener, noreferrer`);
             log(e);
         }
         if (window.focus) {
