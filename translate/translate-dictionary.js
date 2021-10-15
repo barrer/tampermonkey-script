@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.11
+// @version      10.12
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -1247,7 +1247,12 @@
     }
     /**
      * 谷歌翻译 token 计算
-     * https://github.com/hujingshuang/MTrans
+     * 
+     * function token(a), Copyright 2021 https://github.com/hujingshuang/MTrans.
+     * “
+     * 目前，本项目免费开源，开发者可基于此进行二次开发。
+     * （English Translation: Currently, this project is free and open source, developers can be based on this project for secondary development.）
+     * ”
      * */
     function token(a) {
         const b = 406644;
@@ -1271,6 +1276,15 @@
         a %= 1E6;
         return a.toString() + jd + (a ^ b);
     }
+    /**
+     * 谷歌翻译 token 计算
+     * 
+     * function RL(a, b), Copyright 2021 https://github.com/hujingshuang/MTrans.
+     * “
+     * 目前，本项目免费开源，开发者可基于此进行二次开发。
+     * （English Translation: Currently, this project is free and open source, developers can be based on this project for secondary development.）
+     * ”
+     * */
     function RL(a, b) {
         const t = "a";
         const Yb = "+";
