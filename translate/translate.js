@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      10.10
+m// @version      10.11
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、DeepL翻译、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -420,9 +420,14 @@
     log(`redirect_url:${redirect_url}`);
     if (redirect_url && window.location.host == 'example.com') {
         document.documentElement.style.display = 'none';
-        document.body.innerHTML = `<a id="redirect_url" rel="noreferrer noopener" href="${redirect_url}">${redirect_url}</a>`;
+        let a = document.createElement('a');
+        a.setAttribute('id', 'redirect_url');
+        a.setAttribute('rel', 'noreferrer noopener');
+        a.setAttribute('href', redirect_url);
+        a.appendChild(document.createTextNode(redirect_url));
+        document.body.appendChild(a);
         gm.set(gm.REDIRECT_URL, '');
-        document.querySelector('#redirect_url').click();
+        a.click();
         return;
     }
     // 弹出后的新页面判断是否进行自动化处理
@@ -514,8 +519,12 @@
         try {
             win = window.open('', title, `scrollbars=yes, width=${w}, height=${h}, top=${y}, left=${x}`);
             win.opener = null;
-            win.document.body.innerHTML = `<a id="redirect_url" rel="noreferrer noopener" href="${url}"></a>`;
-            win.document.querySelector('#redirect_url').click();
+            let a = win.document.createElement('a');
+            a.setAttribute('id', 'redirect_url');
+            a.setAttribute('rel', 'noreferrer noopener');
+            a.setAttribute('href', url);
+            win.document.body.appendChild(a);
+            a.click();
         } catch (e) {
             try {
                 win.close();
