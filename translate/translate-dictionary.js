@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.12
+// @version      10.13
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -19,7 +19,7 @@
 // ==/UserScript==
 
 /*
- * Copyright 2019-2021 https://github.com/barrer.
+ * Copyright 2019-2022 https://github.com/barrer.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -528,6 +528,14 @@
             const v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
+    }
+    /**遍历删除元素*/
+    function iterElementRemove(arr) {
+        for (let i = arr.length - 1; i >= 0; i--) {
+            if (arr[i] !== undefined && arr[i] !== null && arr[i] instanceof Element) {
+                arr[i].remove();
+            }
+        }
     }
     /**对象转 xml*/
     function objToXml(obj) {
@@ -1097,7 +1105,10 @@
                 let mt = mean.querySelector('p[class^="Mean_desc"]')
                     && mean.querySelector('p[class^="Mean_desc"]').innerHTML.includes('以上结果来自机器翻译。')
                     ? ',p[class^="Mean_desc"],h2[class^="Mean_sentence"]' : '';
-                mean.querySelectorAll(`p[class^="Mean_tag"],p[class^="Mean_else"],ul[class^="TabList_tab"],h3[class^="Mean_title"]${mt}`).forEach(el => el.remove());
+                iterElementRemove(mean.querySelectorAll(`p[class^="Mean_tag"],p[class^="Mean_else"],ul[class^="TabList_tab"],h3[class^="Mean_title"]${mt}`));// 其它
+                let ky = [];
+                mean.querySelectorAll('a[href^="https://kuaiyi.wps.cn"]').forEach(el => ky.push(el.parentElement));// 快译
+                iterElementRemove(ky);
                 mean.innerHTML = mean.innerHTML.replace(/<li><\/li>/g, '');// GNU、MODE
                 dom.appendChild(mean);
             }
@@ -1148,9 +1159,7 @@
                 .replace(/(?:a>)/ig, 'span>')
                 .replace(/(?:<a)/ig, '<span');
             let doc = htmlToDom(rst);
-            doc.querySelectorAll('.hw_ti').forEach(ele => { // 牛津词头（不准）
-                ele.remove();
-            });
+            iterElementRemove(doc.querySelectorAll('.hw_ti'));// 牛津词头（不准）
             let entry = doc.querySelector('.qdef .hd_area');
             let concise = doc.querySelector('.qdef ul');
             let tense = doc.querySelector('.qdef .hd_div1');
