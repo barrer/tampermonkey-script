@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      10.13
+// @version      10.14
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、DeepL翻译、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -72,9 +72,11 @@
         }
     };
     const dataTransfer = {
-        beforePopup(popup) {
+        beforePopup(popup, id) {
             const text = window.getSelection().toString().trim();
-            gm.set(gm.TEXT, text);
+            if (!(id in beforePopupDoNotSetValueMaps)) {
+                gm.set(gm.TEXT, text);
+            }
             popup(text);
         },
         beforeCustom(custom) {
@@ -191,21 +193,6 @@
         custom(text) { }
     },
     {
-        name: '谷歌翻译',
-        id: 'googleCn',
-        image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAM1BMVEX///8hlvPx+P4vnfRLqvWr1/pnt/c9o/XH5fx1vvhZsPaQyvmd0frj8v3V6/253vuDxPifZv7YAAAAAXRSTlMAQObYZgAAAzNJREFUeF7tWduu2zAMMyXfc+v/f+2wARu6paEVHwfDAcznIqRpWaZV960w8Tr+L38BgoUg+PwUP1AM/ABe8hA/EMXAD6T8ED/gxcA/3ASp+APdm/zDTRCPN+hh4QdQRpmwJ/yNQPiJ1G5+xb8oFn5es3YEgHyY8A8y4YWP8EL4B5ogEReIJwEKYLQJu8cFipAfDzPhUFzg9dGuAmLCsO3n53CgCdulo5pJyyAmjLLf77Rqx5gg1/b7hpkrDCb0Vz+KvXP3m7DgEqvt7uTl0798zV9ewUvMy+flx5EVJ9hyQk4YUsab7zJBCq6xvBMc9SM20sYMTq4K4xkSbWsMShdzRvYwi47khrRUM/x22rQIgiiGnp/E3hahq33zgZWENBqXF8DS0mRREGhmIZln1aymK9WDoMrFI4VYYDiPK1kTKVh66etmP9qF7CpvvpmdFbHej/6UJIj9RKpNQVZyYKixC3ulUWd5IehuSoBpZ/xcAS+Ez8kktpO3q2iitIPS2v0GLjCgtEJmsbxCozB+jsKjWiVh4M/yg+P8HIVZ7KWdaOtm56/04Xa2UHmqihe7TxpavZPdF+TmMCYKq9BzQ5N0R8HWjMTZ3eEXdjkPxK4gJIFkuDEIhJ+8xtYB1DTWHOSADJzTSTQkmtj9kul/agZWpKSj3cQKwk8UDNoGiYSfKKCXev+UhDsriaTKwcvXnTSLYbV4KOG/O1hYblfCFm3Bk9dB/78Hi9J3SocCxM1OnxMPG30K1LoPWwVaD7q+EUcKFnryBdMdSxSQUrC9k6vJwwCGmrvp8bKPyLgESj9o0EpRw8e9b+jenB1SwJGC/ONaAcfScYtS6OttRaGCI+19OYIjZrL1ZLTZkaSordKSmvKA25w11V2HLJ/3VDqlOUBQl6+AuJuE9a7noTvt388j0NHL81hokngekSfK8eCp7nwU9AFDUitWrO8ZdsFwvHXcg0eZsjn3gADnZE00V4j/Tf+MgJ8IiY3pNv2VVp4U4NwRhWSp7NyzAvqHIlOA1nvwowVUdw95tIApYAqYAqaAKWAKmAKmgJkJp4ApYAqYAqaAKcDne1i/Sx6YAqaAKWBi4gcHHzTEXirPfgAAAABJRU5ErkJggg==',
-        host: ['translate.google.cn'],
-        popup(text) {
-            popupCenter('https://translate.google.cn', null, 800, screen.height);
-        },
-        custom(text) {
-            const source = document.querySelectorAll('textarea')[0];
-            source.value = text;
-            triggerEvent(source, 'input');
-            triggerEvent(source, 'keyup');
-        }
-    },
-    {
         name: '金山词霸',
         id: 'iciba',
         image: 'data:image/png;base64,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',
@@ -253,9 +240,9 @@
         name: 'Oxford Dictionaries',
         id: 'ode',
         image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAABgFBMVEX////8/v/5/f/p+f7c9v3N8v247fyW5Pp93fhm2PdT0vZGz/Y3zPUwyfQpyPUtyfQ0yvU8zfVL0fZe1vd12/iO4vqm6PvD7/zV9P3h9/3y/P7i+P3F8PyF4Plh1vdBzfUnx/QUwvMNwPMLwPMIv/IFvvIDvvIBvfIAvfIQwfMcxfNP0vZ53fia5fm66/v1/P/e9/2r6fsAvvIaxPNp2ffw+/637PsgxfQAvPL4/f+U4/okxvSC3vkjxvTs+v4kx/P6/v9u2fjH8fwSwvOi5/oyyfUWw/O97vwCv/HA7/xW0/aJ3voBwPFp1/cbw/MOwfMGwfAVwfTZ9f3l+P6y6/ud5vpH0PzI8f3D9P3W9fpa1PcXxfRk1/cdxfSR4/nR8/2K4fm+7foAvPHK8fzT9P206fsuyPQYxPMew/Sv6/u57/xx2vi07PsZw/MhyPS/8PwyxvPU8/2D3fcryfWs5/pX1/3U8/e67ftj2PgzzPaQ3/c/0fZ64fj5/v/X8/tJ0/lwlwy1AAAAAXRSTlMAQObYZgAACJlJREFUeAHt2fdfIkkax/GnaBhRyUmCCkI3/UVw24SKIpLUhQ3uwbjuseLkmZ3V2Rzm8p9+oS85r6qGQpvXxfevj+FD6OpQNLH/Yw7F6Xow456dm/d4fX/mDwRD4Ug0thBPJNnU/3lqMba0nM6sZHOqltehm/KaqmYLq4Fiae29uMGm99/XN9zFjIoRNrfS2zOLZZoCh7LjLu7uYbycp6SQ3SrO/bkDyFqNk72Srmq6AHmHtgYwZTGSyWMSB3YG1Da2DzGhI/sC6vFGAfjXBSixeR3/ugBHc7kF/OsCyu1j4F8YkCid4F8ZEF/W8C8MqJwW34etAaxOEzDWMoC9AZVOk5EsY2YLdgfU3ekmSTL2t2B7ALk3uwnZ938VUwj44EPto3W59/9jjLd5tusNzhfnut3uXCjtOVp5f2zAJ1BnJQpYe3UPo+V/EehG9jdOXb1EX+n3+8548+F5dfbTg9yYAKiNPo1zcYxRNtWDUKT9WYLxC+cvH0QHgZWRAThbStJovW4e1jY/D0VP42WywBLN2KVPw9AyAFtXFRpF2dZgafPjubaTxlA6JX/mkWUAVjdohMrjLCxli+0ESSg/uVq3DnjqWSRrDw9hyXOVYCTHqFsHID9IkZVHaVgpbD8zaHKCAOTWGIklIxosbC0pRDYFIP2cxF7swsLLdpnsC9DcSRKJh3SIFTsOsjEAuw8Z8ZJVFUJa+DmRrQFIO4nDOgcQUredZHeA9jjJzY2qDpGny+tkewBeurh53AOh+ec0hYB81aB3Oa5UiLyKsWkEIPCc3tULQkQt1WgqAdrjOt3mmMlBJJyg6QQgGKfbUiGIeJo0rYBstE7/xDZWIdCaqUwtAMUU/VPyIx0CgxRNL2Dr9tf7mQcCX7ymUViylni0sPCsp5QrdwjQGxX6u/pMAQJhhSwx5dnM7Lx/uPXxx4eBovvLVGXSAIRS9He1ZQisWi8BrN8e7OY0HSbo6kr6cdNgkwX4OozIxDrH4OmWNzIs1Z7jl63d6y+TUgH8UlCPquANrd4A4yakQmRYSkwSgG6fyFQLQ2DeSULJtSNYeH87NUmA/4LI9CgInlZKkohxPoQldTYxQUB2g5FpZxW8jzdIpLKRwQifXCvyAViqmBM2swdeOk4C7NSPkbLVsnzAQPnbxTAEZhUSUAYYY7jBpAOCPXPS74KXr1aI5zg/wTghp3TAcMH6WqjVJoF4ehPjqEuGbMBZ25wsDsHzLxDPcaVhvOO4bIBaNScbBfBCceL15/YwnnbOJAO0bXOynwVHv+wTr/MGMsI1yYD8nDlxq6JlyCCOI6pDRsYlGYC0OdkWBOSuiFcLQ0q2zSQDvOZkoIHzeZt4Tg+kqJGkZMCuOQkJAr56QbzFLUjJz9UkA96Yk3QeHN8D4m0UIMfTnyggKAh4+TVx2JpsgM85UYBHB+ebz4hTv8pKb9tJBryaKMARlQ74VjbA8iPwdojDZs4gJ9Mj3nd5cE4sA75/j3ixAuQEUsRhJd0qYF72MPz6BFLyxRpxjAZ4W+aoKwh49QPxel5IURtl4tQuYbUQXargnK0Rr1+ElOxanTiJH8HzmaNSDhxVdEFkVCFl9xnxfvoUvKA5igoC8tsKcdjPLcgoKsRb8Iq+LOaofQZesUe89TQk5IVbAj8MwdHemqPTN+AFmsSrVCHh8BnxhJc9askcfesF72SDBJrfY6x8pEy85PVTcHJr5ixRBE9bqhPPWMphnF+5SMAZAm/r1JyVGxBolEmgl8YYhV9XSKDjAy8QN2csCt5T8f2Foz3ESPp2nwTYTAEm4f35wxVw9g53SCQZXQGHO3o4yqUOXskgkysAXu5xhUTK7iwsbQYXGYm4PKNuIPpdCMwlSEgptWAlfcFIpDJzAt7u12SiejUP3tENiSlRP4TUOYv/T4k5HbzQOpmI7WQgXo3FjAu3Fxy12E4xEmLtrU3wqg76m/4AApkbslJxlfxZ7VasutqNpRhZSHR18G7tHNUfq+Dp1zWyZMTbl57dk1ah0Fp5cxB6fKEwssJiX0Ag3aO/Y6ffQ+D7UxqBJZVvb9pra+cbHWe5TiMo4T0ILCdvP3nRIcC9BRz2FzTGaUb8KP5Wdf18Rfy8h2xQa0DkN99K7NgUe3RvLPYKAtpvK3RLpaqJ73MVuq/naYj4F+kdLj9EWlcG3Y8zDBE9YtA7DHceIgdP6F6UhgaRwwVG72pmILJ3v30zY78AEX2bO8DK1xBS3TW6M3ZzBKHhA8b97OsWhE4e37mAdTwQ2mvUiKN8lIdQwd2nO2GnHoi9bJJAMwix3Hac7sB44YHY2czvhMHtAsTyoUVGk6pd7UJMf6uQUH+gw0Jgw6DJOEsFWPB1yELHDyuHjxM0gfLDogoLWtUgC2y/ACvZ7k2ZJLFvS7uwspn+Vmrd4mUizSTJSMTmPwGH2w8V6hVhLX9cWijTOM5Yd7gJS2cfJGmUiyBG0PzXr12jLtR6T65CWxghG6nRaK+HGEV/E9xeW+wL71x//6Ia8uUwijbbpzGS1QJG2yscd0vnO651JelgdcYclXI/fhqLNv7wlYoxinEaSykVMF7LFwwNZiPuarVaul6eS3tXVYw3/4wkKO4CJOU1NadqkPR0vklSaqUzTENwkST1IznYz/eQpPVLBdjt+Ic6yau1A5uwUy7cZBNeTAT3YJ+VUoom9ayrwSab3vMyTc5ZOoE9ip063UU5loYNCtc9uiMWrx7hnvR0rEZ3Z+zM414Ol+J1ug8Wj86f4a4ykSdJui+j1w61cAf6UcRVY2SDeio2OMSECp7SRZnswso/bwdUyDvs7vcMshMznkUH/jxktNKRG8VBtqsrPz8efK9itK1049xVYTQVrK4sxqoDz+pZTtX0P4MJup7Pa2p2JRO6ntmJG4ymiVWU+EJs6TLk8X5/tLv6Z8PDjD+QHkSublyJMqP/m9CfAEzoM7Az/eTVAAAAAElFTkSuQmCC',
-        host: ['en.oxforddictionaries.com'],
+        host: ['ode.example.com'],
         popup(text) {
-            popupCenter(`https://www.lexico.com/search?utf8=%E2%9C%93&filter=en_dictionary&dictionary=en&query=${encodeURIComponent(text)}`, null, 800, screen.height);
+            popupCenter(`https://www.google.com/search?q=${encodeURIComponent(text)} meaning`, null, 800, screen.height);
         },
         custom(text) { }
     },
@@ -266,6 +253,16 @@
         host: ['www.merriam-webster.com'],
         popup(text) {
             popupCenter(`https://www.merriam-webster.com/dictionary/${encodeURIComponent(text)}`, null, 800, screen.height);
+        },
+        custom(text) { }
+    },
+    {
+        name: 'Vocabulary.com',
+        id: 'vocabulary',
+        image: 'data:image/png;base64,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',
+        host: ['www.vocabulary.com'],
+        popup(text) {
+            popupCenter(`https://www.vocabulary.com/dictionary/${encodeURIComponent(text)}`, null, 800, screen.height);
         },
         custom(text) { }
     },
@@ -337,6 +334,8 @@
     // id、host 唯一性校验
     const idMaps = {};
     const hostMaps = {};
+    // 指定 id 在弹窗方法调用时不存储选中文字
+    const beforePopupDoNotSetValueMaps = { more: 'more' };
     customMadeIconArray.forEach(({ id, host }) => {
         if (id in idMaps) {
             alert(`Duplicate Id: ${id}`);
@@ -379,7 +378,7 @@
         img.setAttribute('title', name);
         img.addEventListener('mouseup', () => {
             if (!isDrag(dragFluctuation)) {
-                dataTransfer.beforePopup(popup);
+                dataTransfer.beforePopup(popup, id);
             }
         });
         if (isIconImgMore) {
