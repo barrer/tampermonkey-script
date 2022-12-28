@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.13
+// @version      10.14
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -1107,7 +1107,7 @@
                     ? ',p[class^="Mean_desc"],h2[class^="Mean_sentence"]' : '';
                 iterElementRemove(mean.querySelectorAll(`p[class^="Mean_tag"],p[class^="Mean_else"],ul[class^="TabList_tab"],h3[class^="Mean_title"]${mt}`));// 其它
                 let ky = [];
-                mean.querySelectorAll('a[href^="https://kuaiyi.wps.cn"]').forEach(el => ky.push(el.parentElement));// 快译
+                mean.querySelectorAll('a[href*="https://kuaiyi.wps.cn"]').forEach(el => ky.push(el.parentElement));// 快译
                 iterElementRemove(ky);
                 mean.innerHTML = mean.innerHTML.replace(/<li><\/li>/g, '');// GNU、MODE
                 dom.appendChild(mean);
