@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.14
+// @version      10.15
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -19,7 +19,7 @@
 // ==/UserScript==
 
 /*
- * Copyright 2019-2022 https://github.com/barrer.
+ * Copyright 2019-2023 https://github.com/barrer.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -143,7 +143,7 @@
     .cambridge .dphrase-block{margin-left:1em}
     .cambridge .dphrase-title b{font-weight:normal}
     .cambridge .ddef_h,.cambridge .def-body{display:inline}
-    .iciba h1,.iciba p{margin:0;padding:0;font-size:1em;font-weight:normal}
+    .iciba h1,.iciba p,.iciba [class^="Mean_word"]{margin:0;padding:0;font-size:1em;font-weight:normal}
     .iciba ul{list-style:none;margin:0;padding:0}
     .iciba li>i{font-style:normal}
     .iciba ul[class^="Mean_symbols"] li{display:inline;color:#808080;margin-right:1em}
