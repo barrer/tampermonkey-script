@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.15
+// @version      10.16
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -609,18 +609,27 @@
     /**清理 html*/
     function cleanHtml(html) {
         html = html.replace(/<script[\s\S]*?<\/script>/ig, '')
+            .replace(/<script[\s\S]*?>/ig, '')
+            .replace(/<style[\s\S]*?<\/style>/ig, '')
+            .replace(/<style[\s\S]*?>/ig, '')
+            .replace(/<meta[\s\S]*?<\/meta>/ig, '')
             .replace(/<meta[\s\S]*?>/ig, '')
             .replace(/<title[\s\S]*?<\/title>/ig, '')
+            .replace(/<title[\s\S]*?>/ig, '')
             .replace(/<head[\s\S]*?<\/head>/ig, '')
+            .replace(/<head[\s\S]*?>/ig, '')
+            .replace(/<link[\s\S]*?<\/link>/ig, '')
             .replace(/<link[\s\S]*?>/ig, '')
-            .replace(/<style[\s\S]*?<\/style>/ig, '')
             .replace(/<audio[\s\S]*?<\/audio>/ig, '')
             .replace(/<audio[\s\S]*?>/ig, '')
             .replace(/<video[\s\S]*?<\/video>/ig, '')
             .replace(/<video[\s\S]*?>/ig, '')
             .replace(/<iframe[\s\S]*?<\/iframe>/ig, '')
             .replace(/<iframe[\s\S]*?>/ig, '')
-            .replace(/<img[\s\S]*?>/ig, '');
+            .replace(/<img[\s\S]*?<\/img>/ig, '')
+            .replace(/<img[\s\S]*?>/ig, '')
+            .replace(/<svg[\s\S]*?<\/svg>/ig, '')
+            .replace(/<svg[\s\S]*?>/ig, '');
         html = cleanAttr(html, /on[a-z]*/ig);
         return html;
     }
@@ -641,7 +650,7 @@
             let attrIndex = 0;
             let attrMs = attrStr
                 .matchAll( // 此正则会匹配“key=value”[1]这种形式，属性中仅有单“key”[2]不匹配，属性中混合[1][2]仅匹配[1]且[2]会算作其之前邻近[1]的value
-                    /([\s][a-zA-Z0-9-]+(((?![=<>])[\s])*))=(((?!([\s][a-zA-Z0-9-]+(((?![=<>])[\s])*))=)(?![<>])[\s\S])*)/g
+                    /([\s][a-zA-Z0-9-]+(((?![=<>])[\s])*))=(((?!([\s][a-zA-Z0-9-]+(((?![=<>])[\s])*))=)(?!<|>|\/>)[\s\S])*)/g
                 )
             for (const am of attrMs) {
                 let key = am[1].trim();
@@ -1107,7 +1116,7 @@
                     ? ',p[class^="Mean_desc"],h2[class^="Mean_sentence"]' : '';
                 iterElementRemove(mean.querySelectorAll(`p[class^="Mean_tag"],p[class^="Mean_else"],ul[class^="TabList_tab"],h3[class^="Mean_title"]${mt}`));// 其它
                 let ky = [];
-                mean.querySelectorAll('a[href*="https://kuaiyi.wps.cn"]').forEach(el => ky.push(el.parentElement));// 快译
+                mean.querySelectorAll('a[href*="translate.iciba.com"]').forEach(el => ky.push(el.parentElement));// 快译
                 iterElementRemove(ky);
                 mean.innerHTML = mean.innerHTML.replace(/<li><\/li>/g, '');// GNU、MODE
                 dom.appendChild(mean);
