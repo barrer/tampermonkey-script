@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.16
+// @version      10.17
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -19,7 +19,7 @@
 // ==/UserScript==
 
 /*
- * Copyright 2019-2023 https://github.com/barrer.
+ * Copyright 2019-2024 https://github.com/barrer.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -946,12 +946,12 @@
             icon.style.position = 'absolute';
             icon.style.zIndex = zIndex;
         } else if (!selected) { // 隐藏翻译图标
-            log('hide icon');
             hideIcon();
         }
     }
     /**隐藏 icon*/
     function hideIcon() {
+        log('hide icon');
         icon.style.display = 'none';
         icon.removeAttribute('activate'); // 标注面板关闭
         content.style.display = 'none';
@@ -1213,9 +1213,9 @@
         dom.setAttribute('class', ids.BING);
         dom.innerHTML = html;
         // 发音
-        dom.querySelectorAll('[data-sound]').forEach(ele => {
-            let str = ele.getAttribute('data-sound');
-            let regex = /'(https:\/\/.*?)'/ig;
+        dom.querySelectorAll('#bigaud_us,#bigaud_uk').forEach(ele => {
+            let str = ele.getAttribute('data-mp3link');
+            let regex = /(https:\/\/.+)/ig;
             let match = regex.exec(str);
             if (match && match.length >= 1) {
                 ele.appendChild(getPlayButton({
@@ -1243,6 +1243,8 @@
         const dom = document.createElement('div');
         dom.setAttribute('class', ids.CAMBRIDGE);
         try {
+            rst = rst.replace(/<audio/ig, '<span')
+                .replace(/<\/audio/ig, '</span'); // 发音链接预处理
             rst = cleanHtml(rst).replace(/(?:a>)/ig, 'span>')
                 .replace(/(?:<a)/ig, '<span');
             const doc = htmlToDom(rst);
