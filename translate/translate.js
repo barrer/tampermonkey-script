@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      10.16
+// @version      10.17
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、DeepL翻译、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -139,14 +139,13 @@
         image: 'data:image/png;base64,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',
         host: ['translate.google.com'],
         popup(text) {
-            popupCenter('https://translate.google.com', null, 1024, 800);
+            if (hasChineseByRange(text)) {
+                popupCenter(`https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`, null, 1024, 800);
+            } else {
+                popupCenter(`https://translate.google.com/?sl=auto&tl=zh-CN&text=${encodeURIComponent(text)}&op=translate`, null, 1024, 800);
+            }
         },
-        custom(text) {
-            const source = document.querySelectorAll('textarea')[0];
-            source.value = text;
-            triggerEvent(source, 'input');
-            triggerEvent(source, 'keyup');
-        }
+        custom(text) { }
     },
     {
         name: 'DeepL翻译',
