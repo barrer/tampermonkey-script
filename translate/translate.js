@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      10.17
+// @version      10.18
 // @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、DeepL翻译、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -159,11 +159,7 @@
                 popupCenter(`https://www.deepl.com/translator#en/zh/${encodeURIComponent(text)}`, null, 1024, 800);
             }
         },
-        custom(text) {
-            const source = document.querySelector('textarea');
-            source.value = text;
-            triggerEvent(source, 'change');
-        }
+        custom(text) { }
     },
     {
         name: 'Microsoft Translator',
