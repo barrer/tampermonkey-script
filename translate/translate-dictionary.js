@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.17
+// @version      10.18
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -10,7 +10,7 @@
 // @include      file:///*
 // @connect      youdao.com
 // @connect      iciba.com
-// @connect      translate.google.com
+// @connect      translate-pa.googleapis.com
 // @connect      hjenglish.com
 // @connect      bing.com
 // @connect      chinacloudapi.cn
@@ -19,7 +19,7 @@
 // ==/UserScript==
 
 /*
- * Copyright 2019-2024 https://github.com/barrer.
+ * Copyright 2019-2025 https://github.com/barrer.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -295,12 +295,13 @@
                 });
             };
             obj[ids.GOOGLE] = (text, time) => {
-                let url = 'https://translate.google.com/translate_a/single?client=gtx&dt=t&dt=bd&dj=1&source=input&hl=zh-CN&sl=auto';
-                url += `&tk=${token(text)}`;
+                let url = 'https://translate-pa.googleapis.com/v1/translateHtml';
+                let language = 'zh';
+                let escapeText = text.replace(/"/g, "&quot;").replace(/'/g, "&apos;").replace(/(\r?\n)+/g, '","');
                 if (hasChineseByRange(text)) {
-                    url += `&tl=en&q=${encodeURIComponent(text)}`;
+                    language = 'en';
                 } else {
-                    url += `&tl=zh-CN&q=${encodeURIComponent(text)}`;
+                    language = 'zh';
                 }
                 ajax(url, rst => {
                     putEngineResult(ids.GOOGLE, parseGoogle(rst), time);
@@ -308,6 +309,14 @@
                 }, rst => {
                     putEngineResult(ids.GOOGLE, htmlToDom('error: 无法连接翻译服务'), time);
                     showContent();
+                }, {
+                    method: 'POST',
+                    headers: {
+                        'Host': 'translate-pa.googleapis.com',
+                        'Content-Type': 'application/json+protobuf',
+                        'X-Goog-API-Key': 'AIzaSyATBXajvzQLTDHEQbcpq0Ihe0vWDHmO520'
+                    },
+                    data: `[[["${escapeText}"],"auto","${language}"],"wt_lib"]`
                 });
             };
             obj[ids.CAMBRIDGE] = (text, time) => {
@@ -1231,7 +1240,13 @@
         const dom = document.createElement('div');
         dom.setAttribute('class', ids.GOOGLE);
         try {
-            dom.appendChild(htmlToDom(xmlToHtml(objToXml(iframeWin.JSON.parse(rst)), 'span')));
+            let translationResult = iframeWin.JSON.parse(rst)[0];
+            let translationResultHtml = '<div>';
+            for (let i = 0; i < translationResult.length; i++) {
+                translationResultHtml += `<div>${translationResult[i].replace(/&amp;/g, '&').replace(/&gt;/g, '>').replace(/&lt;/g, '<')}</div>`;
+            }
+            translationResultHtml += '</div>';
+            dom.appendChild(htmlToDom(translationResultHtml));
         } catch (error) {
             log(error);
             dom.appendChild(htmlToDom(error));
@@ -1264,56 +1279,5 @@
             dom.appendChild(htmlToDom(error));
         }
         return dom;
-    }
-    /**
-     * 谷歌翻译 token 计算
-     * 
-     * function token(a), Copyright 2021 https://github.com/hujingshuang/MTrans.
-     * “
-     * 目前，本项目免费开源，开发者可基于此进行二次开发。
-     * （English Translation: Currently, this project is free and open source, developers can be based on this project for secondary development.）
-     * ”
-     * */
-    function token(a) {
-        const b = 406644;
-        const b1 = 3293161072;
-        const jd = ".";
-        const sb = "+-a^+6";
-        const Zb = "+-3^+b+-f";
-        let e = [];
-        let f = 0;
-        let g = 0;
-        for (e = [], f = 0, g = 0; g < a.length; g++) {
-            let m = a.charCodeAt(g);
-            128 > m ? e[f++] = m : (2048 > m ? e[f++] = m >> 6 | 192 : (55296 == (m & 64512) && g + 1 < a.length && 56320 == (a.charCodeAt(g + 1) & 64512) ? (m = 65536 + ((m & 1023) << 10) + (a.charCodeAt(++g) & 1023), e[f++] = m >> 18 | 240, e[f++] = m >> 12 & 63 | 128) : e[f++] = m >> 12 | 224, e[f++] = m >> 6 & 63 | 128), e[f++] = m & 63 | 128)
-        }
-        a = b;
-        for (f = 0; f < e.length; f++) a += e[f],
-            a = RL(a, sb);
-        a = RL(a, Zb);
-        a ^= b1 || 0;
-        0 > a && (a = (a & 2147483647) + 2147483648);
-        a %= 1E6;
-        return a.toString() + jd + (a ^ b);
-    }
-    /**
-     * 谷歌翻译 token 计算
-     * 
-     * function RL(a, b), Copyright 2021 https://github.com/hujingshuang/MTrans.
-     * “
-     * 目前，本项目免费开源，开发者可基于此进行二次开发。
-     * （English Translation: Currently, this project is free and open source, developers can be based on this project for secondary development.）
-     * ”
-     * */
-    function RL(a, b) {
-        const t = "a";
-        const Yb = "+";
-        for (let c = 0; c < b.length - 2; c += 3) {
-            let d = b.charAt(c + 2);
-            d = d >= t ? d.charCodeAt(0) - 87 : Number(d);
-            d = b.charAt(c + 1) == Yb ? a >>> d : a << d;
-            a = b.charAt(c) == Yb ? a + d & 4294967295 : a ^ d;
-        }
-        return a;
     }
 })();
