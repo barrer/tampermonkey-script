@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.18
+// @version      10.19
 // @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
@@ -13,7 +13,6 @@
 // @connect      translate-pa.googleapis.com
 // @connect      hjenglish.com
 // @connect      bing.com
-// @connect      chinacloudapi.cn
 // @connect      cambridge.org
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
@@ -39,13 +38,12 @@
 
     // Your code here...
     /**联网权限*/
-    // @connect      youdao.com             有道词典
-    // @connect      iciba.com              金山词霸
-    // @connect      translate.google.com   谷歌翻译
-    // @connect      hjenglish.com          沪江小D
-    // @connect      bing.com               必应词典
-    // @connect      chinacloudapi.cn       必应词典-发音
-    // @connect      cambridge.org          剑桥高阶
+    // @connect      youdao.com                    有道词典
+    // @connect      iciba.com                     金山词霸
+    // @connect      translate-pa.googleapis.com   谷歌翻译
+    // @connect      hjenglish.com                 沪江小D
+    // @connect      bing.com                      必应词典
+    // @connect      cambridge.org                 剑桥高阶
     // 注意：自定义变量修改后把 “@version” 版本号改为 “10000” 防止自动更新
     // >---- 可以自定义的变量 -----
     const fontSize = 14; // 字体大小[可自定义]
@@ -79,15 +77,6 @@
     tr-engine~tr-engine{margin-top:1em}
     tr-engine .title{color:#121212;display:inline-block;font-size:110%;font-weight:bold}
     /*各引擎样式*/
-    .google .sentences,.google .trans,.google .orig,.google .dict,.google .pos,.none{display:block}
-    .google .backend,.google .entry,.google .base_form,.google .pos_enum,.google .src,.google .confidence,.google .ld_result,.google .translation_engine_debug_info,.none{display:none}
-    .google .orig{color:#808080}
-    .google .pos{margin-top:1em}
-    .google .pos:before{content:"<"}
-    .google .pos:after{content:">"}
-    .google .terms:before{content:"〔"}
-    .google .terms:after{content:"〕"}
-    .google .terms{margin-right:.2em}
     .youdao .pron{margin-right:1em}
     .youdao .phone{color:#808080;margin-right:1em}
     .youdao .phone:before{content:"["}
@@ -225,7 +214,7 @@
                 }
                 return rst;
             };
-            obj[ids.CAMBRIDGE] = 'https://dictionary.cambridge.org/search/english-chinese-simplified/direct/?q=%q%';
+            obj[ids.CAMBRIDGE] = 'https://dictionary.cambridge.org/search/direct/?datasetsearch=english-chinese-simplified&q=%q%';
             return obj;
         })(),
         // 翻译引擎
