@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         划词翻译：多词典查询
 // @namespace    http://tampermonkey.net/
-// @version      10.20
-// @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、剑桥高阶、沪江小D、谷歌翻译”
+// @version      10.21
+// @description  划词翻译调用“有道词典（有道翻译）、金山词霸、Bing 词典（必应词典）、谷歌翻译”
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
 // @match        http://*/*
@@ -12,12 +12,11 @@
 // @connect      iciba.com
 // @connect      translate-pa.googleapis.com
 // @connect      bing.com
-// @connect      cambridge.org
 // @grant        GM_xmlhttpRequest
 // ==/UserScript==
 
 /*
- * Copyright 2019-2025 https://github.com/barrer.
+ * Copyright 2019-2026 https://github.com/barrer.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +40,6 @@
     // @connect      iciba.com                     金山词霸
     // @connect      translate-pa.googleapis.com   谷歌翻译
     // @connect      bing.com                      必应词典
-    // @connect      cambridge.org                 剑桥高阶
     // 注意：自定义变量修改后把 “@version” 版本号改为 “10000” 防止自动更新
     // >---- 可以自定义的变量 -----
     const fontSize = 14; // 字体大小[可自定义]
@@ -108,18 +106,6 @@
     .bing .idm_seg,.bing .li_ids_co{margin-left:1em}
     .bing .sim{display:inline}
     .bing .val{display:none}
-    .cambridge .entry~.entry{margin-top:1em}
-    .cambridge p,.cambridge h2,.cambridge h3{padding:0;margin:0}
-    .cambridge h2,.cambridge h3{font-size:1em;font-weight:normal}
-    .cambridge .headword .hw{display:block}
-    .cambridge .pron{color:#808080;margin-right:1em}
-    .cambridge b.def{font-weight:normal}
-    .cambridge .examp,.cambridge .extraexamps,.cambridge .cols,.cambridge .xref,.cambridge .fcdo,.cambridge div[fallback],.cambridge .i-volume-up,.cambridge .daccord{display:none}
-    .cambridge .entry-body__el+.entry-body__el{margin-top:1em}
-    .cambridge .epp-xref,.cambridge .db,.cambridge .bb,.cambridge .i-caret-right,.cambridge .dsense_h{display:none}
-    .cambridge .dphrase-block{margin-left:1em}
-    .cambridge .dphrase-title b{font-weight:normal}
-    .cambridge .ddef_h,.cambridge .def-body{display:inline}
     .iciba h1,.iciba p,.iciba [class^="Mean_word"]{margin:0;padding:0;font-size:1em;font-weight:normal}
     .iciba ul{list-style:none;margin:0;padding:0}
     .iciba li>i{font-style:normal}
@@ -154,14 +140,13 @@
         YOUDAO: 'youdao',
         YOUDAO_LOWER_CASE: 'youdaoLowerCase',
         BING: 'bing',
-        GOOGLE: 'google',
-        CAMBRIDGE: 'cambridge'
+        GOOGLE: 'google'
     };
     // 唯一 ID 扩展
     const idsExtension = {
         // ID 组
-        LIST_DICT: [ids.ICIBA, ids.YOUDAO, ids.BING, ids.CAMBRIDGE],
-        LIST_DICT_LOWER_CASE: [ids.ICIBA, ids.ICIBA_LOWER_CASE, ids.YOUDAO, ids.YOUDAO_LOWER_CASE, ids.BING, ids.CAMBRIDGE],
+        LIST_DICT: [ids.ICIBA, ids.YOUDAO, ids.BING],
+        LIST_DICT_LOWER_CASE: [ids.ICIBA, ids.ICIBA_LOWER_CASE, ids.YOUDAO, ids.YOUDAO_LOWER_CASE, ids.BING],
         LIST_GOOGLE: [ids.GOOGLE],
         // 去重比对（大小写翻译可能一样）
         lowerCaseMap: (() => {
@@ -179,7 +164,6 @@
             obj[ids.YOUDAO_LOWER_CASE] = '';
             obj[ids.BING] = 'Bing 词典';
             obj[ids.GOOGLE] = '谷歌翻译';
-            obj[ids.CAMBRIDGE] = '剑桥高阶';
             return obj;
         })(),
         // 跳转到网站（“%q%”占位符或者 function text -> return URL）
@@ -199,7 +183,6 @@
                 }
                 return rst;
             };
-            obj[ids.CAMBRIDGE] = 'https://dictionary.cambridge.org/search/direct/?datasetsearch=english-chinese-simplified&q=%q%';
             return obj;
         })(),
         // 翻译引擎
@@ -277,16 +260,6 @@
                         'X-Goog-API-Key': 'AIzaSyATBXajvzQLTDHEQbcpq0Ihe0vWDHmO520'
                     },
                     data: `[[["${escapeText}"],"auto","${language}"],"wt_lib"]`
-                });
-            };
-            obj[ids.CAMBRIDGE] = (text, time) => {
-                const url = `https://dictionary.cambridge.org/dictionary/english-chinese-simplified/${encodeURIComponent(text)}`;
-                ajax(url, rst => {
-                    putEngineResult(ids.CAMBRIDGE, parseCambridge(rst), time);
-                    showContent();
-                }, rst => {
-                    putEngineResult(ids.CAMBRIDGE, htmlToDom('error: 无法连接翻译服务'), time);
-                    showContent();
                 });
             };
             return obj;
@@ -1175,33 +1148,6 @@
             }
             translationResultHtml += '</div>';
             dom.appendChild(htmlToDom(translationResultHtml));
-        } catch (error) {
-            log(error);
-            dom.appendChild(htmlToDom(error));
-        }
-        return dom;
-    }
-    /**剑桥高阶排版*/
-    function parseCambridge(rst) {
-        const dom = document.createElement('div');
-        dom.setAttribute('class', ids.CAMBRIDGE);
-        try {
-            rst = rst.replace(/<audio/ig, '<span')
-                .replace(/<\/audio/ig, '</span'); // 发音链接预处理
-            rst = cleanHtml(rst).replace(/(?:a>)/ig, 'span>')
-                .replace(/(?:<a)/ig, '<span');
-            const doc = htmlToDom(rst);
-            // 发音
-            doc.querySelectorAll('[type="audio/mpeg"]').forEach(ele => {
-                ele.appendChild(getPlayButton({
-                    name: '♫',
-                    url: `https://dictionary.cambridge.org/${ele.getAttribute('src')}`
-                }));
-            });
-            // 内容
-            doc.querySelectorAll('.entry').forEach(ele => {
-                dom.appendChild(ele);
-            });
         } catch (error) {
             log(error);
             dom.appendChild(htmlToDom(error));
