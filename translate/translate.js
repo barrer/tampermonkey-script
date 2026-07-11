@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Translate
 // @namespace    http://tampermonkey.net/
-// @version      10.20
-// @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、沪江小D、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、DeepL翻译、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
+// @version      10.21
+// @description  划词翻译调用“金山词霸、有道词典（有道翻译）、Google Translate（谷歌翻译）、搜狗翻译、必应词典（必应翻译）、Microsoft Translator（必应在线翻译）、DeepL翻译、海词词典、百度翻译、Oxford Learner's Dictionaries、Oxford Dictionaries、Merriam-Webster、PDF 划词翻译、Google Search、Bing Search（必应搜索）、百度搜索、Wikipedia Search（维基百科搜索）”网页翻译
 // @author       https://github.com/barrer
 // @license      https://www.apache.org/licenses/LICENSE-2.0
 // @match        http://*/*
@@ -14,7 +14,7 @@
 // ==/UserScript==
 
 /*
- * Copyright 2017-2025 https://github.com/barrer.
+ * Copyright 2017-2026 https://github.com/barrer.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@
         image: 'data:image/png;base64,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',
         host: ['www.bing.com', 'cn.bing.com'],
         popup(text) {
-            popupCenter(`https://www.bing.com/dict/search?q=${encodeURIComponent(text)}`, null, 1024, 800);
+            popupCenter(`https://cn.bing.com/dict/search?q=${encodeURIComponent(text)}`, null, 1024, 800);
         },
         custom(text) { }
     },
@@ -214,20 +214,6 @@
             popupCenter(`https://dict.cn/${encodeURIComponent(text)}`, null, 1024, 800);
         },
         custom(text) { }
-    },
-    {
-        name: '沪江小D',
-        id: 'hjenglish',
-        image: 'data:image/png;base64,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',
-        host: ['dict.hjenglish.com'],
-        popup(text) {
-            popupCenter(`https://dict.hjenglish.com/w/${encodeURIComponent(text)}`, null, 1024, 800);
-        },
-        custom(text) {
-            document.querySelectorAll('.word-details-button-expand').forEach(ele => {
-                ele.click();
-            });
-        }
     },
     {
         name: 'Oxford Learner\'s Dictionaries',
